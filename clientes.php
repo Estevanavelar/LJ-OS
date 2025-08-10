@@ -619,35 +619,32 @@ async function consultarCNPJ() {
 // Função para alternar status do cliente
 function toggleStatus(idCliente, statusAtual) {
     const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
-    const mensagem = statusAtual === 'ativo' ? 'desativar' : 'ativar';
     const csrf = <?php echo json_encode(csrf_token()); ?>;
-    
-    if (confirm(`Tem certeza que deseja ${mensagem} este cliente?`)) {
-        fetch('api/clientes.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': csrf
-            },
-            body: JSON.stringify({
-                acao: 'toggle_status',
-                id_cliente: idCliente,
-                status: novoStatus
-            })
+
+    fetch('api/clientes.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrf
+        },
+        body: JSON.stringify({
+            acao: 'toggle_status',
+            id_cliente: idCliente,
+            status: novoStatus
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                location.reload();
-            } else {
-                LavaJato.showAlert(data.erro || 'Erro ao alterar status', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            LavaJato.showAlert('Erro ao alterar status', 'danger');
-        });
-    }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            location.reload();
+        } else {
+            LavaJato.showAlert(data.erro || 'Erro ao alterar status', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        LavaJato.showAlert('Erro ao alterar status', 'danger');
+    });
 }
 
 // Inicializar campos de documento

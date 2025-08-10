@@ -36,6 +36,12 @@ $pdo = getDB();
 $action = $_GET['action'] ?? '';
 
 try {
+    // Suporte a DELETE direto (exclusão)
+    if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+        excluirFuncionario();
+        exit;
+    }
+
     switch ($action) {
         case 'estatisticas':
             getEstatisticas();
@@ -55,11 +61,8 @@ try {
         case 'visualizar':
             visualizarFuncionario();
             break;
-        case 'editar':
-            editarFuncionario();
-            break;
-        case 'excluir':
-            excluirFuncionario();
+        case 'registrar_presenca':
+            registrarPresenca();
             break;
         default:
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -423,6 +426,37 @@ function visualizarFuncionario() {
         ]);
     } catch (Exception $e) {
         throw new Exception('Erro ao visualizar funcionário: ' . $e->getMessage());
+    }
+}
+
+function registrarPresenca() {
+    global $pdo;
+
+    // Aceita tanto multipart (FormData) quanto x-www-form-urlencoded
+    $id_funcionario = $_POST['id_funcionario'] ?? null;
+    $data = $_POST['data'] ?? null;
+    $tipo = $_POST['tipo'] ?? null; // 'entrada' ou 'saida'
+    $hora = $_POST['hora'] ?? null;
+
+    if (!$id_funcionario || !$data || !$tipo || !$hora) {
+        http_response_code(400);
+        echo json_encode(['erro' => 'Campos de presença incompletos']);
+        return;
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO presenca_funcionarios (id_funcionario, data, tipo, hora)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([$id_funcionario, $data, $tipo, $hora]);
+
+        echo json_encode([
+            'sucesso' => true,
+            'mensagem' => 'Presença registrada com sucesso'
+        ]);
+    } catch (Exception $e) {
+        throw new Exception('Erro ao registrar presença: ' . $e->getMessage());
     }
 }
 

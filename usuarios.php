@@ -24,7 +24,7 @@ $stmt = $pdo->prepare("
     SELECT 
         COUNT(*) as total_usuarios,
         COUNT(CASE WHEN status = 'ativo' THEN 1 END) as usuarios_ativos,
-        COUNT(CASE WHEN ultimo_acesso >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as usuarios_ativos_semana
+        COUNT(CASE WHEN ultimo_login >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 END) as usuarios_ativos_semana
     FROM usuarios
 ");
 $stmt->execute();

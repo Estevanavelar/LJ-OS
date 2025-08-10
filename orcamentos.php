@@ -734,10 +734,6 @@ function renderizarVisualizacaoOrcamento(orcamento) {
 // Aprovar orçamento
 async function aprovarOrcamento() {
     if (!orcamentoAtual) return;
-    
-    const confirmacao = confirm('Deseja aprovar este orçamento?');
-    if (!confirmacao) return;
-    
     try {
         const response = await fetch('api/orcamentos.php', {
             method: 'PUT',
@@ -746,9 +742,7 @@ async function aprovarOrcamento() {
             },
             body: `action=aprovar&id=${orcamentoAtual.id_orcamento}`
         });
-        
         const data = await response.json();
-        
         if (data.sucesso) {
             mostrarAlerta('Orçamento aprovado com sucesso!', 'success');
             bootstrap.Modal.getInstance(document.getElementById('modalVisualizarOrcamento')).hide();
@@ -766,10 +760,6 @@ async function aprovarOrcamento() {
 // Rejeitar orçamento
 async function rejeitarOrcamento() {
     if (!orcamentoAtual) return;
-    
-    const confirmacao = confirm('Deseja rejeitar este orçamento?');
-    if (!confirmacao) return;
-    
     try {
         const response = await fetch('api/orcamentos.php', {
             method: 'PUT',
@@ -778,9 +768,7 @@ async function rejeitarOrcamento() {
             },
             body: `action=rejeitar&id=${orcamentoAtual.id_orcamento}`
         });
-        
         const data = await response.json();
-        
         if (data.sucesso) {
             mostrarAlerta('Orçamento rejeitado com sucesso!', 'success');
             bootstrap.Modal.getInstance(document.getElementById('modalVisualizarOrcamento')).hide();

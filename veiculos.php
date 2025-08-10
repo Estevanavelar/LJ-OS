@@ -447,28 +447,26 @@ if ($acao === 'listar') {
 
 // Função para inativar veículo
 function toggleStatus(id) {
-    if (confirm('Tem certeza que deseja inativar este veículo?')) {
-        fetch('api/veiculos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'acao=toggle_status&id=' + id
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                LavaJato.showAlert('Veículo inativado com sucesso!', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                LavaJato.showAlert(data.erro || 'Erro ao inativar veículo', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            LavaJato.showAlert('Erro ao processar requisição', 'danger');
-        });
-    }
+    fetch('api/veiculos.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'acao=toggle_status&id=' + id
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            LavaJato.showAlert('Veículo inativado com sucesso!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            LavaJato.showAlert(data.erro || 'Erro ao inativar veículo', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        LavaJato.showAlert('Erro ao processar requisição', 'danger');
+    });
 }
 
 // Máscara para placa

@@ -298,11 +298,11 @@ if ($acao === 'listar') {
                                     <td>
                                         <?php
                                         $status_class = [
-                                            'pendente' => 'bg-warning',
-                                            'confirmado' => 'bg-info',
+                                            'pendente' => 'bg-warning',      // amarelo
+                                            'confirmado' => 'bg-success',    // verde
                                             'em_andamento' => 'bg-primary',
                                             'concluido' => 'bg-success',
-                                            'cancelado' => 'bg-danger'
+                                            'cancelado' => 'bg-danger'       // vermelho
                                         ];
                                         $status_text = [
                                             'pendente' => 'Pendente',
@@ -549,30 +549,30 @@ function alterarStatus(id, status) {
         'confirmado': 'confirmar',
         'cancelado': 'cancelar'
     };
-    
-    if (confirm(`Tem certeza que deseja ${statusText[status]} este agendamento?`)) {
-        fetch('api/agendamentos.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRF-Token': document.querySelector('input[name="_token"]').value // Incluir token CSRF
-            },
-            body: `acao=alterar_status&id=${id}&status=${status}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                LavaJato.showAlert(`Agendamento ${statusText[status]} com sucesso!`, 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                LavaJato.showAlert(data.erro || 'Erro ao alterar status', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            LavaJato.showAlert('Erro ao processar requisição', 'danger');
-        });
-    }
+
+    const csrfInput = document.querySelector('input[name="_csrf"]');
+    const csrf = csrfInput ? csrfInput.value : '';
+
+    fetch('api/agendamentos.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: `acao=alterar_status&id=${encodeURIComponent(id)}&status=${encodeURIComponent(status)}${csrf ? `&_csrf=${encodeURIComponent(csrf)}` : ''}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.sucesso) {
+            LavaJato.showAlert(`Agendamento ${statusText[status]} com sucesso!`, 'success');
+            setTimeout(() => location.reload(), 800);
+        } else {
+            LavaJato.showAlert(data.erro || 'Erro ao alterar status', 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        LavaJato.showAlert('Erro ao processar requisição', 'danger');
+    });
 }
 </script>
 

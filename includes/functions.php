@@ -559,4 +559,32 @@ function definirConfiguracao($chave, $valor, $descricao = null, $tipo = 'texto',
         return false;
     }
 }
+
+/**
+ * Funções utilitárias de data/hora
+ */
+function formatarData($data)
+{
+    if (empty($data)) {
+        return '';
+    }
+    $ts = is_numeric($data) ? (int)$data : strtotime((string)$data);
+    if ($ts === false) {
+        return '';
+    }
+    return date('d/m/Y', $ts);
+}
+
+function formatarDataHora($data)
+{
+    if (empty($data)) {
+        return '';
+    }
+    $ts = is_numeric($data) ? (int)$data : strtotime((string)$data);
+    if ($ts === false) {
+        return '';
+    }
+    return date('d/m/Y H:i', $ts);
+}
+
 ?> 

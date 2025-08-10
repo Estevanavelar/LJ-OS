@@ -651,64 +651,52 @@ $formas_pagamento = ['dinheiro', 'pix', 'cartao_credito', 'cartao_debito', 'tran
 
         function toggleStatusMovimentacao(id, statusAtual) {
             const novoStatus = statusAtual === 'pago' ? 'pendente' : 'pago';
-            const confirmacao = confirm(`Deseja alterar o status para ${novoStatus}?`);
-            
-            if (confirmacao) {
-                fetch('api/financeiro.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'toggle_status',
-                        id: id,
-                        status: novoStatus
-                    })
+            fetch('api/financeiro.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'toggle_status',
+                    id: id,
+                    status: novoStatus
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        mostrarAlerta('Status alterado com sucesso!', 'success');
-                        carregarMovimentacoes();
-                    } else {
-                        mostrarAlerta('Erro ao alterar status: ' + data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    mostrarAlerta('Erro ao alterar status', 'danger');
-                });
-            }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta('Status alterado com sucesso!', 'success');
+                    carregarMovimentacoes();
+                } else {
+                    mostrarAlerta('Erro ao alterar status: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('Erro ao alterar status', 'danger');
+            });
         }
 
         function excluirMovimentacao(id) {
-            const confirmacao = confirm('Tem certeza que deseja excluir esta movimentação?');
-            
-            if (confirmacao) {
-                fetch('api/financeiro.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'excluir',
-                        id: id
-                    })
+            fetch('api/financeiro.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'excluir',
+                    id: id
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        mostrarAlerta('Movimentação excluída com sucesso!', 'success');
-                        carregarMovimentacoes();
-                    } else {
-                        mostrarAlerta('Erro ao excluir movimentação: ' + data.message, 'danger');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    mostrarAlerta('Erro ao excluir movimentação', 'danger');
-                });
-            }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarAlerta('Movimentação excluída com sucesso!', 'success');
+                    carregarMovimentacoes();
+                } else {
+                    mostrarAlerta('Erro ao excluir movimentação: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                mostrarAlerta('Erro ao excluir movimentação', 'danger');
+            });
         }
 
         function abrirModalRelatorio() {

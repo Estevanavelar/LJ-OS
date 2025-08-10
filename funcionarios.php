@@ -567,12 +567,12 @@ async function carregarPresenca() {
     
     try {
         const response = await fetch(`api/funcionarios.php?action=presenca&data=${data}`);
-        const data = await response.json();
+        const dataResp = await response.json();
         
-        if (data.sucesso) {
-            renderizarPresenca(data.presencas);
+        if (dataResp.sucesso) {
+            renderizarPresenca(dataResp.presencas);
         } else {
-            mostrarAlerta('Erro ao carregar presença: ' + data.erro, 'danger');
+            mostrarAlerta('Erro ao carregar presença: ' + dataResp.erro, 'danger');
         }
     } catch (error) {
         console.error('Erro ao carregar presença:', error);
@@ -616,12 +616,12 @@ async function carregarProdutividade() {
     
     try {
         const response = await fetch(`api/funcionarios.php?action=produtividade&${params.toString()}`);
-        const data = await response.json();
+        const dataResp = await response.json();
         
-        if (data.sucesso) {
-            renderizarProdutividade(data.produtividade);
+        if (dataResp.sucesso) {
+            renderizarProdutividade(dataResp.produtividade);
         } else {
-            mostrarAlerta('Erro ao carregar produtividade: ' + data.erro, 'danger');
+            mostrarAlerta('Erro ao carregar produtividade: ' + dataResp.erro, 'danger');
         }
     } catch (error) {
         console.error('Erro ao carregar produtividade:', error);
@@ -665,12 +665,12 @@ async function carregarVendas() {
     
     try {
         const response = await fetch(`api/funcionarios.php?action=vendas&${params.toString()}`);
-        const data = await response.json();
+        const dataResp = await response.json();
         
-        if (data.sucesso) {
-            renderizarVendas(data.vendas);
+        if (dataResp.sucesso) {
+            renderizarVendas(dataResp.vendas);
         } else {
-            mostrarAlerta('Erro ao carregar vendas: ' + data.erro, 'danger');
+            mostrarAlerta('Erro ao carregar vendas: ' + dataResp.erro, 'danger');
         }
     } catch (error) {
         console.error('Erro ao carregar vendas:', error);
@@ -690,7 +690,7 @@ function renderizarVendas(vendas) {
             <td>${venda.produtos_vendidos}</td>
             <td>R$ ${parseFloat(venda.valor_total).toFixed(2).replace('.', ',')}</td>
             <td>R$ ${parseFloat(venda.comissao).toFixed(2).replace('.', ',')}</td>
-            <td>${formatarData(venda.data)}</td>
+            <td>${formatarData(venda.data_venda || venda.data)}</td>
             <td>
                 <button type="button" class="btn btn-outline-info btn-sm" onclick="verDetalhesVenda(${venda.id_venda})" title="Ver Detalhes">
                     <i class="fas fa-eye"></i>
@@ -712,34 +712,44 @@ function abrirModalFuncionario() {
     modal.show();
 }
 
-// Registrar presença
+// Registrar presença (abre modal)
 function registrarPresenca() {
     const modal = new bootstrap.Modal(document.getElementById('modalPresenca'));
     modal.show();
 }
 
-// Salvar funcionário
-document.getElementById('formFuncionario').addEventListener('submit', async function(e) {
+// Salvar funcionário (criar/atualizar)
+const formFuncionario = document.getElementById('formFuncionario');
+formFuncionario.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
     const funcionarioId = document.getElementById('funcionario_id').value;
-    
+
     try {
-        const response = await fetch('api/funcionarios.php', {
-            method: funcionarioId ? 'PUT' : 'POST',
-            body: formData
-        });
-        
+        let response;
+        if (funcionarioId) {
+            // PUT como x-www-form-urlencoded
+            const body = new URLSearchParams();
+            for (const [k, v] of formData.entries()) body.append(k, v);
+            response = await fetch('api/funcionarios.php', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body
+            });
+        } else {
+            // POST aceita multipart
+            response = await fetch('api/funcionarios.php', { method: 'POST', body: formData });
+        }
+
         const data = await response.json();
-        
         if (data.sucesso) {
             mostrarAlerta('Funcionário salvo com sucesso!', 'success');
             bootstrap.Modal.getInstance(document.getElementById('modalFuncionario')).hide();
             carregarFuncionarios();
             carregarEstatisticas();
         } else {
-            mostrarAlerta('Erro ao salvar funcionário: ' + data.erro, 'danger');
+            mostrarAlerta('Erro ao salvar funcionário: ' + (data.erro || data.mensagem || 'Erro desconhecido'), 'danger');
         }
     } catch (error) {
         console.error('Erro ao salvar funcionário:', error);
@@ -747,27 +757,26 @@ document.getElementById('formFuncionario').addEventListener('submit', async func
     }
 });
 
-// Salvar presença
-document.getElementById('formPresenca').addEventListener('submit', async function(e) {
+// Registrar presença (submit)
+const formPresenca = document.getElementById('formPresenca');
+formPresenca.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    
+    // Rota dedicada
     try {
-        const response = await fetch('api/funcionarios.php', {
+        const response = await fetch('api/funcionarios.php?action=registrar_presenca', {
             method: 'POST',
             body: formData
         });
-        
         const data = await response.json();
-        
         if (data.sucesso) {
             mostrarAlerta('Presença registrada com sucesso!', 'success');
             bootstrap.Modal.getInstance(document.getElementById('modalPresenca')).hide();
             carregarPresenca();
             carregarEstatisticas();
         } else {
-            mostrarAlerta('Erro ao registrar presença: ' + data.erro, 'danger');
+            mostrarAlerta('Erro ao registrar presença: ' + (data.erro || data.mensagem || 'Erro desconhecido'), 'danger');
         }
     } catch (error) {
         console.error('Erro ao registrar presença:', error);
@@ -775,7 +784,95 @@ document.getElementById('formPresenca').addEventListener('submit', async functio
     }
 });
 
-// Funções utilitárias
+// Visualizar funcionário
+async function visualizarFuncionario(id) {
+    try {
+        const response = await fetch(`api/funcionarios.php?action=visualizar&id=${id}`);
+        const data = await response.json();
+        if (data.sucesso) {
+            const f = data.funcionario;
+            document.getElementById('modalFuncionarioTitle').textContent = 'Visualizar Funcionário';
+            document.getElementById('funcionario_id').value = f.id_funcionario;
+            document.getElementById('funcionario_nome').value = f.nome;
+            document.getElementById('funcionario_cargo').value = f.cargo;
+            document.getElementById('funcionario_cpf').value = f.cpf;
+            document.getElementById('funcionario_telefone').value = f.telefone;
+            document.getElementById('funcionario_email').value = f.email || '';
+            document.getElementById('funcionario_data_admissao').value = f.data_admissao;
+            document.getElementById('funcionario_salario').value = f.salario;
+            document.getElementById('funcionario_comissao').value = f.comissao;
+            document.getElementById('funcionario_endereco').value = f.endereco || '';
+            document.getElementById('funcionario_observacoes').value = f.observacoes || '';
+
+            // Desabilitar inputs para visualização
+            Array.from(document.querySelectorAll('#formFuncionario input, #formFuncionario select, #formFuncionario textarea'))
+                .forEach(el => el.setAttribute('disabled', 'disabled'));
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalFuncionario'));
+            modal.show();
+        } else {
+            mostrarAlerta('Erro ao visualizar funcionário: ' + (data.erro || 'Erro desconhecido'), 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta('Erro ao visualizar funcionário', 'danger');
+    }
+}
+
+// Editar funcionário (abre modal com dados habilitados)
+async function editarFuncionario(id) {
+    try {
+        const response = await fetch(`api/funcionarios.php?action=visualizar&id=${id}`);
+        const data = await response.json();
+        if (data.sucesso) {
+            const f = data.funcionario;
+            document.getElementById('modalFuncionarioTitle').textContent = 'Editar Funcionário';
+            document.getElementById('funcionario_id').value = f.id_funcionario;
+            document.getElementById('funcionario_nome').value = f.nome;
+            document.getElementById('funcionario_cargo').value = f.cargo;
+            document.getElementById('funcionario_cpf').value = f.cpf;
+            document.getElementById('funcionario_telefone').value = f.telefone;
+            document.getElementById('funcionario_email').value = f.email || '';
+            document.getElementById('funcionario_data_admissao').value = f.data_admissao;
+            document.getElementById('funcionario_salario').value = f.salario;
+            document.getElementById('funcionario_comissao').value = f.comissao;
+            document.getElementById('funcionario_endereco').value = f.endereco || '';
+            document.getElementById('funcionario_observacoes').value = f.observacoes || '';
+
+            // Habilitar inputs
+            Array.from(document.querySelectorAll('#formFuncionario input, #formFuncionario select, #formFuncionario textarea'))
+                .forEach(el => el.removeAttribute('disabled'));
+
+            const modal = new bootstrap.Modal(document.getElementById('modalFuncionario'));
+            modal.show();
+        } else {
+            mostrarAlerta('Erro ao carregar funcionário: ' + (data.erro || 'Erro desconhecido'), 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta('Erro ao carregar funcionário', 'danger');
+    }
+}
+
+// Excluir funcionário (DELETE)
+async function excluirFuncionario(id) {
+    try {
+        const response = await fetch(`api/funcionarios.php?id=${id}`, { method: 'DELETE' });
+        const data = await response.json();
+        if (data.sucesso) {
+            mostrarAlerta('Funcionário excluído com sucesso!', 'success');
+            carregarFuncionarios();
+            carregarEstatisticas();
+        } else {
+            mostrarAlerta('Erro ao excluir: ' + (data.erro || 'Erro desconhecido'), 'danger');
+        }
+    } catch (e) {
+        console.error(e);
+        mostrarAlerta('Erro ao excluir funcionário', 'danger');
+    }
+}
+
+// Utilitários
 function formatarData(data) {
     return new Date(data).toLocaleDateString('pt-BR');
 }
@@ -810,7 +907,8 @@ function getStatusPresencaBadge(status) {
     return badges[status] || '<span class="badge bg-secondary">Desconhecido</span>';
 }
 
-// Event listeners
+// Filtros
+_documentReady = true;
 document.getElementById('filtro_data_presenca').addEventListener('change', carregarPresenca);
 document.getElementById('filtro_funcionario_prod').addEventListener('change', carregarProdutividade);
 document.getElementById('filtro_funcionario_vendas').addEventListener('change', carregarVendas);

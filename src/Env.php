@@ -28,7 +28,8 @@ class Env
             [$name, $value] = $parts;
             $name = trim($name);
             $value = trim($value);
-            if (preg_match('/^".*"$/', $value) || preg_match('/^\'."'.'*\'."'$/', $value)) {
+            // Remover aspas ao redor, se presentes
+            if ((str_starts_with($value, '"') && str_ends_with($value, '"')) || (str_starts_with($value, "'") && str_ends_with($value, "'"))) {
                 $value = substr($value, 1, -1);
             }
             if (!array_key_exists($name, $_ENV)) {
