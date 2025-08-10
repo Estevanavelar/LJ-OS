@@ -1,0 +1,30 @@
+# Sistema LJ-OS
+# Ignorar arquivos sensíveis e dependências
+
+# Env
+.env
+.env.local
+.env.*
+!.env.example
+
+# Composer
+/vendor/
+composer.lock
+
+# Logs
+/logs/
+*.log
+
+# Uploads (mantém estrutura, ignora conteúdo)
+/uploads/*
+!/uploads/.gitkeep
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db

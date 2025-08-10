@@ -4,14 +4,73 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão se não estiver iniciada
+// Iniciar sessão se não estiver iniciada com configurações seguras
 if (session_status() == PHP_SESSION_NONE) {
+    $cookieParams = session_get_cookie_params();
+    $secure = getenv('SESSION_SECURE') === 'true' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
+    $httpOnly = getenv('SESSION_HTTP_ONLY') !== 'false';
+    $sameSite = getenv('SESSION_SAMESITE') ?: 'Lax';
+    $sessionName = getenv('SESSION_NAME') ?: 'LJSESSIONID';
+
+    session_name($sessionName);
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => $cookieParams['path'] ?? '/',
+        'domain' => $cookieParams['domain'] ?? '',
+        'secure' => $secure,
+        'httponly' => $httpOnly,
+        'samesite' => $sameSite
+    ]);
+
     session_start();
 }
 
 // Incluir configuração do banco de dados
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/apis.php';
+
+// Headers de segurança básicos
+function aplicarHeadersSeguros() {
+    if (headers_sent()) { return; }
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('Referrer-Policy: no-referrer-when-downgrade');
+    header('X-XSS-Protection: 0');
+
+    if ((getenv('HSTS_ENABLED') === 'true') && (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')) {
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+    }
+
+    if (getenv('CSP_ENABLED') === 'true') {
+        $csp = "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self';";
+        header("Content-Security-Policy: $csp");
+    }
+}
+
+aplicarHeadersSeguros();
+
+// CSRF
+function csrf_token() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_field() {
+    $token = csrf_token();
+    return '<input type="hidden" name="_csrf" value="' . htmlspecialchars($token, ENT_QUOTES, 'UTF-8') . '">';
+}
+
+function csrf_verificar() {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $enviado = $_POST['_csrf'] ?? '';
+        if (!hash_equals($_SESSION['csrf_token'] ?? '', $enviado)) {
+            http_response_code(403);
+            exit('Falha de verificação CSRF');
+        }
+    }
+}
 
 /**
  * Função para verificar se o usuário está logado

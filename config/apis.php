@@ -4,30 +4,33 @@
  * LJ-OS Sistema para Lava Jato
  */
 
+require_once __DIR__ . '/../src/Env.php';
+\LJOS\Env::load(__DIR__ . '/../.env');
+
 // Configurações da API de CEP (ViaCEP)
-define('API_CEP_URL', 'https://viacep.com.br/ws/');
-define('API_CEP_TIMEOUT', 10);
+define('API_CEP_URL', \LJOS\Env::get('API_CEP_URL', 'https://viacep.com.br/ws/'));
+define('API_CEP_TIMEOUT', (int) \LJOS\Env::get('API_CEP_TIMEOUT', 10));
 
 // Configurações da API de CNPJ (API Pública)
-define('API_CNPJ_URL', 'https://publica.cnpj.ws/cnpj/');
-define('API_CNPJ_TIMEOUT', 15);
-define('API_CNPJ_USER_AGENT', 'LJ-OS-Sistema/1.0');
+define('API_CNPJ_URL', \LJOS\Env::get('API_CNPJ_URL', 'https://publica.cnpj.ws/cnpj/'));
+define('API_CNPJ_TIMEOUT', (int) \LJOS\Env::get('API_CNPJ_TIMEOUT', 15));
+define('API_CNPJ_USER_AGENT', \LJOS\Env::get('API_CNPJ_USER_AGENT', 'LJ-OS-Sistema/1.0'));
 
 // Configurações para WhatsApp (futuro)
-define('WHATSAPP_API_KEY', '');
-define('WHATSAPP_API_URL', '');
-define('WHATSAPP_PHONE_ID', '');
+define('WHATSAPP_API_KEY', \LJOS\Env::get('WHATSAPP_API_KEY', ''));
+define('WHATSAPP_API_URL', \LJOS\Env::get('WHATSAPP_API_URL', ''));
+define('WHATSAPP_PHONE_ID', \LJOS\Env::get('WHATSAPP_PHONE_ID', ''));
 
 // Configurações para SMS (futuro)
-define('SMS_API_KEY', '');
-define('SMS_API_URL', '');
-define('SMS_SENDER', 'LJ-OS');
+define('SMS_API_KEY', \LJOS\Env::get('SMS_API_KEY', ''));
+define('SMS_API_URL', \LJOS\Env::get('SMS_API_URL', ''));
+define('SMS_SENDER', \LJOS\Env::get('SMS_SENDER', 'LJ-OS'));
 
 // Configurações de notificações
-define('NOTIFICATIONS_ENABLED', true);
-define('NOTIFICATIONS_EMAIL', true);
-define('NOTIFICATIONS_SMS', false);
-define('NOTIFICATIONS_WHATSAPP', false);
+define('NOTIFICATIONS_ENABLED', filter_var(\LJOS\Env::get('NOTIFICATIONS_ENABLED', true), FILTER_VALIDATE_BOOLEAN));
+define('NOTIFICATIONS_EMAIL', filter_var(\LJOS\Env::get('NOTIFICATIONS_EMAIL', true), FILTER_VALIDATE_BOOLEAN));
+define('NOTIFICATIONS_SMS', filter_var(\LJOS\Env::get('NOTIFICATIONS_SMS', false), FILTER_VALIDATE_BOOLEAN));
+define('NOTIFICATIONS_WHATSAPP', filter_var(\LJOS\Env::get('NOTIFICATIONS_WHATSAPP', false), FILTER_VALIDATE_BOOLEAN));
 
 /**
  * Função para consultar CEP via API
@@ -48,7 +51,10 @@ function consultarCEP($cep) {
         ]
     ]);
     
-    $response = file_get_contents($url, false, $context);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) {
+        return ['erro' => 'Erro ao consultar CEP'];
+    }
     $data = json_decode($response, true);
     
     if (!$data || isset($data['erro'])) {
@@ -77,7 +83,10 @@ function consultarCNPJ($cnpj) {
         ]
     ]);
     
-    $response = file_get_contents($url, false, $context);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) {
+        return ['erro' => 'Erro ao consultar CNPJ'];
+    }
     $data = json_decode($response, true);
     
     if (!$data || !isset($data['estabelecimento'])) {
