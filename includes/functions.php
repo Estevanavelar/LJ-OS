@@ -49,6 +49,21 @@ function aplicarHeadersSeguros() {
 
 aplicarHeadersSeguros();
 
+// Helpers de autenticação
+function estaLogado(): bool {
+    return isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_logado']);
+}
+
+/**
+ * Função para verificar se o usuário está logado (redireciona)
+ */
+function verificarLogin() {
+    if (!estaLogado()) {
+        header('Location: login.php');
+        exit();
+    }
+}
+
 // CSRF
 function csrf_token() {
     if (empty($_SESSION['csrf_token'])) {
@@ -72,12 +87,33 @@ function csrf_verificar() {
     }
 }
 
-/**
- * Função para verificar se o usuário está logado
- */
-function verificarLogin() {
-    if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['usuario_logado'])) {
-        header('Location: login.php');
+// CSRF para APIs (aceita header X-CSRF-Token ou campo _csrf no JSON)
+function csrf_verificar_api() {
+    $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+    if ($metodo === 'GET' || $metodo === 'HEAD' || $metodo === 'OPTIONS') {
+        return; // safe methods
+    }
+
+    $tokenHeader = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    $token = $tokenHeader;
+
+    if (!$token) {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (stripos($contentType, 'application/json') !== false) {
+            $raw = file_get_contents('php://input');
+            $data = json_decode($raw, true);
+            if (is_array($data) && isset($data['_csrf'])) {
+                $token = $data['_csrf'];
+            }
+        } else {
+            $token = $_POST['_csrf'] ?? '';
+        }
+    }
+
+    if (!$token || !hash_equals($_SESSION['csrf_token'] ?? '', $token)) {
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode(['erro' => 'Falha de verificação CSRF']);
         exit();
     }
 }
@@ -98,35 +134,34 @@ function verificarNivelAcesso($niveis_permitidos = []) {
  * Função para verificar permissões do usuário
  */
 function verificarPermissao($modulo, $funcionalidade = 'visualizar') {
-    global $pdo;
-    
     if (!isset($_SESSION['usuario_id'])) {
         return false;
     }
-    
+
     try {
+        $db = getDB();
         // Verificar permissão direta do usuário
-        $stmt = $pdo->prepare("
+        $stmt = $db->prepare("
             SELECT COUNT(*) as total 
             FROM permissoes 
             WHERE id_usuario = ? AND modulo = ? AND funcionalidade = ? AND ativo = 1
         ");
         $stmt->execute([$_SESSION['usuario_id'], $modulo, $funcionalidade]);
-        $permissaoDireta = $stmt->fetch()['total'] > 0;
+        $permissaoDireta = ($stmt->fetch()['total'] ?? 0) > 0;
         
         if ($permissaoDireta) {
             return true;
         }
         
         // Verificar permissão via perfil
-        $stmt = $pdo->prepare("
+        $stmt = $db->prepare("
             SELECT COUNT(*) as total 
             FROM permissoes_perfil pp
             JOIN usuarios u ON pp.id_perfil = u.id_perfil
             WHERE u.id_usuario = ? AND pp.modulo = ? AND pp.funcionalidade = ? AND pp.ativo = 1
         ");
         $stmt->execute([$_SESSION['usuario_id'], $modulo, $funcionalidade]);
-        $permissaoPerfil = $stmt->fetch()['total'] > 0;
+        $permissaoPerfil = ($stmt->fetch()['total'] ?? 0) > 0;
         
         return $permissaoPerfil;
     } catch (Exception $e) {
@@ -139,25 +174,24 @@ function verificarPermissao($modulo, $funcionalidade = 'visualizar') {
  * Função para obter permissões do usuário
  */
 function obterPermissoesUsuario($id_usuario) {
-    global $pdo;
-    
     try {
-        $stmt = $pdo->prepare("
+        $db = getDB();
+        $stmt = $db->prepare("
             SELECT modulo, funcionalidade 
             FROM permissoes 
             WHERE id_usuario = ? AND ativo = 1
         ");
         $stmt->execute([$id_usuario]);
-        $permissoesDiretas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $permissoesDiretas = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         
-        $stmt = $pdo->prepare("
+        $stmt = $db->prepare("
             SELECT pp.modulo, pp.funcionalidade 
             FROM permissoes_perfil pp
             JOIN usuarios u ON pp.id_perfil = u.id_perfil
             WHERE u.id_usuario = ? AND pp.ativo = 1
         ");
         $stmt->execute([$id_usuario]);
-        $permissoesPerfil = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $permissoesPerfil = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         
         return array_merge($permissoesDiretas, $permissoesPerfil);
     } catch (Exception $e) {

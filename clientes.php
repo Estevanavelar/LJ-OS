@@ -4,15 +4,10 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão e verificar login
-session_start();
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-require_once 'config/database.php';
 require_once 'includes/functions.php';
+
+// Verificar login
+verificarLogin();
 
 require_once 'includes/header.php';
 
@@ -21,6 +16,7 @@ $id_cliente = $_GET['id'] ?? null;
 
 // Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     $dados = [
         'nome' => sanitizar($_POST['nome'] ?? ''),
         'tipo_pessoa' => sanitizar($_POST['tipo_pessoa'] ?? 'PF'),
@@ -329,6 +325,7 @@ if ($acao === 'listar') {
         </div>
         
         <form method="POST" data-validate>
+            <?php echo csrf_field(); ?>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Nome/Razão Social *</label>
@@ -459,7 +456,7 @@ if ($acao === 'listar') {
                 <label class="form-label">Observações</label>
                 <textarea name="observacoes" class="form-control" rows="3" 
                           placeholder="Observações adicionais"><?php echo htmlspecialchars($cliente['observacoes'] ?? ''); ?></textarea>
-            </div>
+                </div>
             
             <div class="form-group">
                 <label class="form-label">
@@ -623,12 +620,14 @@ async function consultarCNPJ() {
 function toggleStatus(idCliente, statusAtual) {
     const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
     const mensagem = statusAtual === 'ativo' ? 'desativar' : 'ativar';
+    const csrf = <?php echo json_encode(csrf_token()); ?>;
     
     if (confirm(`Tem certeza que deseja ${mensagem} este cliente?`)) {
         fetch('api/clientes.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRF-Token': csrf
             },
             body: JSON.stringify({
                 acao: 'toggle_status',

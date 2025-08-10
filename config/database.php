@@ -4,15 +4,12 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-require_once __DIR__ . '/../src/Env.php';
-\LJOS\Env::load(__DIR__ . '/../.env');
-
 // Configurações do banco de dados
-define('DB_HOST', \LJOS\Env::get('DB_HOST', 'localhost'));
-define('DB_NAME', \LJOS\Env::get('DB_NAME', 'lava_jato_db'));
-define('DB_USER', \LJOS\Env::get('DB_USER', 'root'));
-define('DB_PASS', \LJOS\Env::get('DB_PASS', ''));
-define('DB_CHARSET', \LJOS\Env::get('DB_CHARSET', 'utf8mb4'));
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'lava_jato_db');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('DB_CHARSET', 'utf8mb4');
 
 /**
  * Classe para gerenciar conexões com o banco de dados
