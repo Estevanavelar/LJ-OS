@@ -4,12 +4,23 @@
  * LJ-OS Sistema para Lava Jato
  */
 
+// Carregar helpers para sessão e CSRF, se existir
+$functionsPath = __DIR__ . '/includes/functions.php';
+if (file_exists($functionsPath)) {
+    require_once $functionsPath;
+}
+
 // Verificar se já está instalado
 $ja_instalado = file_exists('config/installed.lock');
 $banco_existe = false;
 
 // Verificar se o banco já existe
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validar CSRF, se função existir
+    if (function_exists('csrf_verificar')) {
+        csrf_verificar();
+    }
+
     $db_host = $_POST['db_host'] ?? 'localhost';
     $db_user = $_POST['db_user'] ?? 'root';
     $db_pass = $_POST['db_pass'] ?? '';
@@ -32,6 +43,7 @@ $sucesso = '';
 
 // Processar instalação
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF já verificado acima (se disponível)
     $db_host = $_POST['db_host'] ?? 'localhost';
     $db_name = $_POST['db_name'] ?? 'lava_jato_db';
     $db_user = $_POST['db_user'] ?? 'root';
@@ -115,87 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Criar arquivo de configuração
-        $config_content = "<?php
-/**
- * Configuração de conexão com o banco de dados
- * LJ-OS Sistema para Lava Jato
- */
-
-// Configurações do banco de dados
-define('DB_HOST', '$db_host');
-define('DB_NAME', '$db_name');
-define('DB_USER', '$db_user');
-define('DB_PASS', '$db_pass');
-define('DB_CHARSET', 'utf8mb4');
-
-/**
- * Classe para gerenciar conexões com o banco de dados
- */
-class Database {
-    private static \$instance = null;
-    private \$connection;
-    
-    /**
-     * Construtor privado para implementar Singleton
-     */
-    private function __construct() {
-        try {
-            // String de conexão PDO
-            \$dsn = \"mysql:host=\" . DB_HOST . \";dbname=\" . DB_NAME . \";charset=\" . DB_CHARSET;
-            
-            // Opções de configuração do PDO
-            \$options = [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::MYSQL_ATTR_INIT_COMMAND => \"SET NAMES utf8mb4\"
-            ];
-            
-            // Criar conexão
-            \$this->connection = new PDO(\$dsn, DB_USER, DB_PASS, \$options);
-            
-        } catch (PDOException \$e) {
-            // Log do erro e exibição de mensagem amigável
-            error_log(\"Erro de conexão com banco de dados: \" . \$e->getMessage());
-            die(\"Erro de conexão com o banco de dados. Tente novamente mais tarde.\");
-        }
-    }
-    
-    /**
-     * Método para obter instância única da classe (Singleton)
-     */
-    public static function getInstance() {
-        if (self::\$instance === null) {
-            self::\$instance = new self();
-        }
-        return self::\$instance;
-    }
-    
-    /**
-     * Método para obter a conexão PDO
-     */
-    public function getConnection() {
-        return \$this->connection;
-    }
-    
-    /**
-     * Previne clonagem da instância
-     */
-    private function __clone() {}
-    
-    /**
-     * Previne deserialização da instância
-     */
-    public function __wakeup() {}
-}
-
-/**
- * Função auxiliar para obter conexão com o banco
- */
-function getDB() {
-    return Database::getInstance()->getConnection();
-}
-?>";
+        $config_content = "<?php\n /**\n  * Configuração de conexão com o banco de dados\n  * LJ-OS Sistema para Lava Jato\n  */\n\n // Configurações do banco de dados\n define('DB_HOST', '$db_host');\n define('DB_NAME', '$db_name');\n define('DB_USER', '$db_user');\n define('DB_PASS', '$db_pass');\n define('DB_CHARSET', 'utf8mb4');\n\n /**\n  * Classe para gerenciar conexões com o banco de dados\n  */\n class Database {\n     private static \$instance = null;\n     private \$connection;\n     \n     private function __construct() {\n         try {\n             \$dsn = \"mysql:host=\" . DB_HOST . \";dbname=\" . DB_NAME . \";charset=\" . DB_CHARSET;\n             \$options = [\n                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,\n                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,\n                 PDO::ATTR_EMULATE_PREPARES => false,\n                 PDO::MYSQL_ATTR_INIT_COMMAND => \"SET NAMES utf8mb4\"\n             ];\n             \$this->connection = new PDO(\$dsn, DB_USER, DB_PASS, \$options);\n         } catch (PDOException \$e) {\n             error_log(\"Erro de conexão com banco de dados: \" . \$e->getMessage());\n             die(\"Erro de conexão com o banco de dados. Tente novamente mais tarde.\");\n         }\n     }\n     public static function getInstance() {\n         if (self::\$instance === null) {\n             self::\$instance = new self();\n         }\n         return self::\$instance;\n     }\n     public function getConnection() {\n         return \$this->connection;\n     }\n     private function __clone() {}\n     public function __wakeup() {}\n }\n function getDB() {\n     return Database::getInstance()->getConnection();\n }\n?>";
         
         file_put_contents('config/database.php', $config_content);
         
@@ -450,6 +382,7 @@ function getDB() {
                 <?php endif; ?>
                 
                 <form method="POST">
+                    <?php echo function_exists('csrf_field') ? csrf_field() : ''; ?>
                     <h3>🗄️ Configuração do Banco de Dados</h3>
                     
                     <div class="form-group">

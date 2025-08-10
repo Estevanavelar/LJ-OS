@@ -4,17 +4,13 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão e verificar login
-session_start();
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-// Verificar permissões ANTES de incluir o header
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 
+// Verificar login
+verificarLogin();
+
+// Verificar permissões ANTES de incluir o header
 $pdo = getDB();
 
 if (!verificarPermissao('permissoes')) {

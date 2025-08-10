@@ -409,6 +409,45 @@ $formas_pagamento = ['dinheiro', 'pix', 'cartao_credito', 'cartao_debito', 'tran
     <?php include 'includes/footer.php'; ?>
     
     <script>
+        // Helpers locais ausentes
+        function mostrarAlerta(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} fade-in`;
+            alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i> ${message}`;
+            const mainContent = document.querySelector('.main-content') || document.body;
+            mainContent.insertBefore(alertDiv, mainContent.firstChild);
+            setTimeout(() => { alertDiv.style.opacity = '0'; setTimeout(() => alertDiv.remove(), 300); }, 5000);
+        }
+
+        function formatarData(isoDate) {
+            if (!isoDate) return '';
+            const d = new Date(isoDate);
+            if (Number.isNaN(d.getTime())) {
+                // Tenta tratar como string YYYY-MM-DD
+                const parts = String(isoDate).split('-');
+                if (parts.length === 3) return `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`;
+                return isoDate;
+            }
+            const dia = String(d.getDate()).padStart(2, '0');
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            const ano = d.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function formatarMoeda(valor) {
+            const num = typeof valor === 'number' ? valor : parseFloat(valor);
+            if (Number.isNaN(num)) return '0,00';
+            return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function debounce(fn, delay = 300) {
+            let t;
+            return function(...args) {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
         let paginaAtual = 1;
         const itensPorPagina = 20;
 

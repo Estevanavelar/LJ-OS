@@ -4,25 +4,23 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Incluir configurações
-require_once 'config.php';
+// Carregar utilitários centrais (sessão segura, CSRF, DB)
+require_once __DIR__ . '/../includes/functions.php';
 
-session_start();
-
-// Verificar se está logado
+// Verificar se está logado como cliente
 if (!isset($_SESSION['cliente_id'])) {
     header('Location: index.php');
     exit();
 }
 
 // Verificar se a sessão é válida
-if (!verificarSessaoCliente()) {
+if (function_exists('verificarSessaoCliente') && !verificarSessaoCliente()) {
     header('Location: index.php');
     exit();
 }
 
 $cliente_id = $_SESSION['cliente_id'];
-$cliente_nome = $_SESSION['cliente_nome'];
+$cliente_nome = $_SESSION['cliente_nome'] ?? 'Cliente';
 
 try {
     $db = getDB();

@@ -4,12 +4,10 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão e verificar login
-session_start();
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/functions.php';
+
+// Verificar login
+verificarLogin();
 
 // Verificar permissões ANTES de incluir o header
 require_once 'config/database.php';
@@ -29,6 +27,7 @@ $acao = $_GET['acao'] ?? '';
 $id_servico = $_GET['id'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     try {
         if ($acao === 'adicionar') {
             $stmt = $pdo->prepare("
@@ -147,6 +146,7 @@ if ($acao === 'editar' && $id_servico) {
                 </div>
                 <div class="card-body">
                     <form method="POST" action="?acao=<?php echo $acao === 'editar' ? 'editar&id=' . $id_servico : 'adicionar'; ?>">
+                        <?php echo csrf_field(); ?>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">

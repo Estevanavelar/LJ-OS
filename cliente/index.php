@@ -4,10 +4,8 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Incluir configurações
-require_once 'config.php';
-
-session_start();
+// Carregar utilitários centrais (sessão segura, CSRF, DB)
+require_once __DIR__ . '/../includes/functions.php';
 
 // Verificar se já está logado
 if (isset($_SESSION['cliente_id'])) {
@@ -19,6 +17,9 @@ $erro = '';
 $cpf_cnpj = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Validar CSRF
+    csrf_verificar();
+
     $cpf_cnpj_limpo = preg_replace('/[^0-9]/', '', $_POST['cpf_cnpj']);
     
     if (strlen($cpf_cnpj_limpo) < 11) {
@@ -39,9 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['cliente_tipo'] = $cliente['tipo_pessoa'];
                 $_SESSION['cliente_acesso'] = time();
                 
-                // Log de acesso
-                $stmt = $db->prepare("INSERT INTO logs_acesso_cliente (id_cliente, ip_acesso, user_agent) VALUES (?, ?, ?)");
-                $stmt->execute([$cliente['id_cliente'], $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']]);
+                // Log de acesso (se função existir)
+                if (function_exists('registrarLogAcesso')) {
+                    $stmt = $db->prepare("INSERT INTO logs_acesso_cliente (id_cliente, ip_acesso, user_agent) VALUES (?, ?, ?)");
+                    $stmt->execute([$cliente['id_cliente'], $_SERVER['REMOTE_ADDR'], $_SERVER['HTTP_USER_AGENT']]);
+                }
                 
                 header('Location: dashboard.php');
                 exit();
@@ -243,6 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <?php endif; ?>
                 
                 <form method="POST" class="needs-validation" novalidate>
+                    <?php echo csrf_field(); ?>
                     <div class="form-floating">
                         <input type="text" 
                                class="form-control" 

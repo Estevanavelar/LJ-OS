@@ -6,11 +6,16 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, X-CSRF-Token');
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit();
+}
 
 // Verificar login
 verificarLogin();
@@ -18,6 +23,12 @@ verificarLogin();
 // Obter dados da requisição
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $_GET['action'] ?? $input['action'] ?? '';
+
+// Validar CSRF para métodos que modificam estado
+$unsafeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];
+if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', $unsafeMethods, true)) {
+    csrf_verificar_api();
+}
 
 try {
     switch ($action) {

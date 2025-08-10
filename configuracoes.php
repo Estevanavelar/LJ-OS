@@ -4,12 +4,10 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão e verificar login
-session_start();
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once 'includes/functions.php';
+
+// Verificar login
+verificarLogin();
 
 // Verificar permissões ANTES de incluir o header
 require_once 'config/database.php';
@@ -26,6 +24,7 @@ require_once 'includes/header.php';
 
 // Processar formulário de configurações
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     try {
         // Atualizar configurações
         $configuracoes = [
@@ -105,6 +104,7 @@ try {
                 </div>
                 <div class="card-body">
                     <form method="POST" action="">
+                        <?php echo csrf_field(); ?>
                         <div class="row">
                             <!-- Informações da Empresa -->
                             <div class="col-md-6">

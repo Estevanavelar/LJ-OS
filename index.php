@@ -5,11 +5,10 @@
  * Redireciona para o dashboard ou login
  */
 
-// Iniciar sessão
-session_start();
+require_once 'includes/functions.php';
 
 // Verificar se o usuário está logado
-if (isset($_SESSION['usuario_id'])) {
+if (estaLogado()) {
     // Se estiver logado, redirecionar para o dashboard
     header('Location: dashboard.php');
     exit;

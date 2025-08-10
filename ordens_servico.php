@@ -4,7 +4,6 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-session_start();
 require_once 'includes/functions.php';
 
 // Verificar login
@@ -18,6 +17,7 @@ $sucesso = '';
 
 // Processar formulário
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     try {
         if ($acao === 'salvar') {
             $id_cliente = $_POST['id_cliente'];
@@ -362,6 +362,7 @@ include 'includes/header.php';
                     </div>
                     <div class="card-body">
                         <form method="POST" action="?acao=salvar<?php echo $id_os ? '&id=' . $id_os : ''; ?>">
+                            <?php echo csrf_field(); ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="mb-3">
@@ -465,6 +466,7 @@ include 'includes/header.php';
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="?acao=alterar_status&id=<?php echo $id_os; ?>">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">Novo Status</label>

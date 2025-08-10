@@ -53,6 +53,24 @@ $nome_empresa = obterConfiguracao('nome_empresa', 'Lava Jato VeltaCar');
             });
         });
     })();
+    
+    // Monkeypatch global de fetch para anexar X-CSRF-Token automaticamente
+    (function() {
+        var CSRF_TOKEN = <?php echo json_encode(csrf_token()); ?>;
+        var originalFetch = window.fetch;
+        window.fetch = function(input, init) {
+            init = init || {};
+            init.headers = init.headers || {};
+            if (init.headers instanceof Headers) {
+                init.headers.set('X-CSRF-Token', CSRF_TOKEN);
+            } else if (typeof init.headers === 'object') {
+                init.headers['X-CSRF-Token'] = CSRF_TOKEN;
+            } else {
+                init.headers = { 'X-CSRF-Token': CSRF_TOKEN };
+            }
+            return originalFetch(input, init);
+        };
+    })();
     </script>
     <!-- Header -->
     <header class="header">

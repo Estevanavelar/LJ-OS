@@ -12,6 +12,7 @@ $sucesso = '';
 
 // Processar ações
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     $acao = $_POST['acao'] ?? 'salvar';
     
     if ($acao === 'salvar') {
@@ -292,6 +293,7 @@ if ($acao === 'listar') {
         
         <div class="card-body">
             <form method="POST" class="needs-validation" novalidate>
+                <?php echo csrf_field(); ?>
                 <input type="hidden" name="acao" value="salvar">
                 <?php if ($veiculo): ?>
                     <input type="hidden" name="id_veiculo" value="<?php echo $veiculo['id_veiculo']; ?>">
