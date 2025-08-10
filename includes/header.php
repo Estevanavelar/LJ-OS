@@ -36,6 +36,24 @@ $nome_empresa = obterConfiguracao('nome_empresa', 'Lava Jato VeltaCar');
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 </head>
 <body>
+    <script>
+    // Injeta token CSRF em todos os formulários POST que não possuam o campo
+    (function() {
+        document.addEventListener('DOMContentLoaded', function() {
+            var csrf = <?php echo json_encode(csrf_token()); ?>;
+            var forms = document.querySelectorAll('form[method="post" i]');
+            forms.forEach(function(f) {
+                if (!f.querySelector('input[name="_csrf"]')) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = '_csrf';
+                    input.value = csrf;
+                    f.appendChild(input);
+                }
+            });
+        });
+    })();
+    </script>
     <!-- Header -->
     <header class="header">
         <div class="container">

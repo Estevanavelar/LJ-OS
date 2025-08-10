@@ -16,6 +16,7 @@ $erro = '';
 
 // Processar login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verificar();
     $email = sanitizar($_POST['email'] ?? '');
     $senha = $_POST['senha'] ?? '';
     
@@ -36,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if ($usuario && password_verify($senha, $usuario['senha'])) {
                 // Login bem-sucedido
+                session_regenerate_id(true);
                 $_SESSION['usuario_id'] = $usuario['id_usuario'];
                 $_SESSION['usuario_nome'] = $usuario['nome'];
                 $_SESSION['usuario_email'] = $usuario['email'];
@@ -297,6 +299,7 @@ $nome_empresa = obterConfiguracao('nome_empresa', 'Lava Jato VeltaCar');
         <?php endif; ?>
         
         <form method="POST" class="login-form">
+            <?php echo csrf_field(); ?>
             <div class="form-group">
                 <label for="email" class="form-label">
                     <i class="fas fa-envelope"></i> Email
