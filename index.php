@@ -5,9 +5,11 @@
  * Redireciona para o dashboard ou login
  */
 
+require_once 'config/replit.php';
 session_start();
 require_once 'config/database.php';
-require_once 'config/replit.php';
+require_once 'includes/functions.php';
+
 
 // Verificar se o usuário está logado
 if (estaLogado()) {

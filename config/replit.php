@@ -4,13 +4,15 @@
  * Configurações específicas para ambiente Replit
  */
 
+// Configurações de sessão para Replit (ANTES de iniciar sessão)
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_secure', '1');
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+}
+
 // URL base do sistema no Replit
 define('BASE_URL', 'https://' . $_SERVER['HTTP_HOST']);
-
-// Configurações de sessão para Replit
-ini_set('session.cookie_secure', '1');
-ini_set('session.cookie_httponly', '1');
-ini_set('session.cookie_samesite', 'Lax');
 
 // Configurações de upload
 ini_set('upload_max_filesize', '10M');
