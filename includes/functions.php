@@ -4,25 +4,23 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Iniciar sessão se não estiver iniciada com configurações seguras
-if (session_status() == PHP_SESSION_NONE) {
-    $cookieParams = session_get_cookie_params();
-    $secure = getenv('SESSION_SECURE') === 'true' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
-    $httpOnly = getenv('SESSION_HTTP_ONLY') !== 'false';
-    $sameSite = getenv('SESSION_SAMESITE') ?: 'Lax';
-    $sessionName = getenv('SESSION_NAME') ?: 'LJSESSIONID';
-
-    session_name($sessionName);
-    session_set_cookie_params([
-        'lifetime' => 0,
-        'path' => $cookieParams['path'] ?? '/',
-        'domain' => $cookieParams['domain'] ?? '',
-        'secure' => $secure,
-        'httponly' => $httpOnly,
-        'samesite' => $sameSite
-    ]);
-
-    session_start();
+// Função para iniciar sessão segura (será chamada quando necessário)
+function iniciarSessaoSegura() {
+    if (session_status() == PHP_SESSION_NONE) {
+        // Configurações básicas de sessão para Replit
+        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+        
+        session_set_cookie_params([
+            'lifetime' => 0,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $secure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+        
+        session_start();
+    }
 }
 
 // Incluir configuração do banco de dados
@@ -51,6 +49,7 @@ aplicarHeadersSeguros();
 
 // Helpers de autenticação
 function estaLogado(): bool {
+    iniciarSessaoSegura();
     return isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_logado']);
 }
 
