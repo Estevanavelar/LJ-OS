@@ -6,3 +6,15 @@ channel = "stable-25_05"
 
 [deployment]
 run = ["sh", "-c", "run command"]
+
+[workflows]
+runButton = "Servidor PHP"
+
+[[workflows.workflow]]
+name = "Servidor PHP"
+author = 46306102
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:5000 -t ."

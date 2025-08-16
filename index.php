@@ -5,7 +5,9 @@
  * Redireciona para o dashboard ou login
  */
 
-require_once 'includes/functions.php';
+session_start();
+require_once 'config/database.php';
+require_once 'config/replit.php';
 
 // Verificar se o usuário está logado
 if (estaLogado()) {
@@ -17,4 +19,4 @@ if (estaLogado()) {
     header('Location: login.php');
     exit;
 }
-?> 
+?>
