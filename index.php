@@ -6,10 +6,11 @@
  */
 
 require_once 'config/replit.php';
-session_start();
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 
+// Iniciar sessão
+iniciarSessaoSegura();
 
 // Verificar se o usuário está logado
 if (estaLogado()) {
@@ -21,4 +22,3 @@ if (estaLogado()) {
     header('Location: login.php');
     exit;
 }
-?>
