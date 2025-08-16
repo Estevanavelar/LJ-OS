@@ -53,18 +53,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nome_empresa = $_POST['nome_empresa'] ?? 'LJ-OS Sistema para Lava Jato';
     
     try {
-        // Testar conexão com banco
-        $dsn = "mysql:host=$db_host;charset=utf8mb4";
-        $pdo = new PDO($dsn, $db_user, $db_pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        // Verificar se o banco já existe
-        $stmt = $pdo->query("SHOW DATABASES LIKE '$db_name'");
-        $banco_existe = $stmt->rowCount() > 0;
-        
-        // Criar banco de dados se não existir
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS `$db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $pdo->exec("USE `$db_name`");
+        // Testar conexão com PostgreSQL
+        if (isset($_ENV['DATABASE_URL'])) {
+            $pdo = getDB();
+        } else {
+            $dsn = "pgsql:host=$db_host;port=5432";
+            $pdo = new PDO($dsn, $db_user, $db_pass);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
         
         // Se o banco já existia, verificar se as tabelas existem
         if ($banco_existe) {
@@ -104,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $sucesso = "Sistema instalado com sucesso! O banco de dados foi criado e as tabelas foram adicionadas.";
             }
         } else {
-            // Banco não existia, executar script SQL completo
-            $sql_file = file_get_contents('sql/database_completo.sql');
+            // Executar script SQL do PostgreSQL
+            $sql_file = file_get_contents('sql/database_postgresql.sql');
             $statements = explode(';', $sql_file);
             
             foreach ($statements as $statement) {
