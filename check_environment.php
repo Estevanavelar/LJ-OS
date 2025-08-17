@@ -17,7 +17,7 @@ if (getenv('REPL_ID')) {
 echo "🐘 PHP Version: " . PHP_VERSION . "\n";
 
 // Verificar extensões necessárias
-$required_extensions = ['pdo', 'pdo_mysql', 'mbstring', 'json', 'curl'];
+$required_extensions = ['pdo', 'pdo_sqlite', 'mbstring', 'json'];
 foreach ($required_extensions as $ext) {
     if (extension_loaded($ext)) {
         echo "✅ $ext\n";
@@ -26,27 +26,40 @@ foreach ($required_extensions as $ext) {
     }
 }
 
-// Verificar banco de dados
+// Verificar banco de dados SQLite
+echo "\n🗄️  Verificando banco de dados...\n";
 try {
     require_once 'config/database.php';
-    $pdo = new PDO("mysql:host=" . DB_HOST, DB_USER, DB_PASS);
-    echo "✅ Conexão MySQL funcionando\n";
+    $pdo = getDB();
+    echo "✅ Conexão SQLite funcionando\n";
+    echo "📁 Banco: " . DB_PATH . "\n";
+    
+    // Verificar se as tabelas existem
+    $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(PDO::FETCH_COLUMN);
+    if (count($tables) > 0) {
+        echo "✅ Tabelas encontradas: " . implode(', ', $tables) . "\n";
+    } else {
+        echo "⚠️  Nenhuma tabela encontrada - execute setup_database.php\n";
+    }
+    
 } catch (Exception $e) {
-    echo "❌ Erro MySQL: " . $e->getMessage() . "\n";
+    echo "❌ Erro SQLite: " . $e->getMessage() . "\n";
+    echo "💡 Execute: php setup_database.php\n";
 }
 
 // Verificar diretórios
-$dirs = ['uploads', 'logs', 'config'];
+echo "\n📁 Verificando diretórios...\n";
+$dirs = ['uploads', 'logs', 'config', 'database'];
 foreach ($dirs as $dir) {
-    if (is_dir($dir) && is_writable($dir)) {
-        echo "✅ Diretório $dir (OK)\n";
+    if (is_dir($dir)) {
+        $writable = is_writable($dir) ? "✅" : "⚠️";
+        echo "$writable Diretório $dir\n";
     } else {
-        echo "⚠️  Diretório $dir (verificar permissões)\n";
+        echo "❌ Diretório $dir (não existe)\n";
     }
 }
 
-echo "\n🚀 Para configurar o sistema:\n";
+echo "\n🚀 Próximos passos:\n";
 echo "1. Execute: php setup_database.php\n";
-echo "2. Acesse install.php no navegador\n";
-echo "3. Configure seus dados e comece a usar!\n";
-?>
+echo "2. Acesse o sistema pelo navegador\n";
+echo "3. Faça login com admin@lavajato.com / admin123\n";
