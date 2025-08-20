@@ -1,24 +1,23 @@
 <?php
 /**
- * Página inicial do sistema
- * LJ-OS Sistema para Lava Jato
- * Redireciona para o dashboard ou login
+ * Página inicial do sistema LJ-OS
  */
 
-require_once 'config/replit.php';
-require_once 'config/database.php';
-require_once 'includes/functions.php';
-
-// Iniciar sessão
-iniciarSessaoSegura();
-
-// Verificar se o usuário está logado
-if (estaLogado()) {
-    // Se estiver logado, redirecionar para o dashboard
-    header('Location: dashboard.php');
-    exit;
-} else {
-    // Se não estiver logado, redirecionar para o login
-    header('Location: login.php');
+// Verificar se o sistema está instalado
+if (!file_exists('config/installed.lock')) {
+    header('Location: install.php');
     exit;
 }
+
+// Inicializar configuração
+require_once 'config/config.php';
+
+// Verificar se está logado
+if (verificar_login()) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Redirecionar para login
+header('Location: login.php');
+exit;
