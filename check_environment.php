@@ -32,7 +32,12 @@ try {
     require_once 'config/database.php';
     $pdo = getDB();
     echo "✅ Conexão SQLite funcionando\n";
-    echo "📁 Banco: " . DB_PATH . "\n";
+    // Obter caminho do banco
+    $db_path = __DIR__ . '/database/lj_os.db';
+    if (defined('DB_PATH')) {
+        $db_path = DB_PATH;
+    }
+    echo "📁 Banco: " . $db_path . "\n";
     
     // Verificar se as tabelas existem
     $tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(PDO::FETCH_COLUMN);
