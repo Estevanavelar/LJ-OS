@@ -1,4 +1,3 @@
-
 <?php
 /**
  * Configuração Principal do Sistema LJ-OS
@@ -74,13 +73,15 @@ if (DEBUG) {
     error_reporting(E_ERROR | E_WARNING | E_PARSE);
 }
 
-// Configurações de sessão segura
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_strict_mode', 1);
-ini_set('session.cookie_samesite', 'Lax');
+// Configurações de sessão segura (ANTES de qualquer saída)
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.use_strict_mode', 1);
+    ini_set('session.cookie_samesite', 'Lax');
 
-if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-    ini_set('session.cookie_secure', 1);
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        ini_set('session.cookie_secure', 1);
+    }
 }
 
 // Headers de segurança
@@ -88,7 +89,7 @@ if (!headers_sent()) {
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('X-XSS-Protection: 1; mode=block');
-    
+
     if (!DEBUG) {
         header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     }
@@ -98,7 +99,7 @@ if (!headers_sent()) {
 $required_dirs = [
     __DIR__ . '/../uploads',
     __DIR__ . '/../uploads/clientes',
-    __DIR__ . '/../uploads/veiculos', 
+    __DIR__ . '/../uploads/veiculos',
     __DIR__ . '/../uploads/funcionarios',
     __DIR__ . '/../uploads/documentos',
     __DIR__ . '/../logs',
