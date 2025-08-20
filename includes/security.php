@@ -205,10 +205,7 @@ function csrf_token() {
     return SecurityManager::getInstance()->generateCSRF();
 }
 
-function csrf_field() {
-    $token = csrf_token();
-    return "<input type='hidden' name='csrf_token' value='{$token}'>";
-}
+// csrf_field() já está definida em functions.php
 
 function validate_csrf($token) {
     return SecurityManager::getInstance()->validateCSRF($token);

@@ -4,6 +4,17 @@
  * Sistema completo para gestão de lava jato
  */
 
+// Configurações de sessão PRIMEIRO (antes de qualquer saída)
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.cookie_httponly', '1');
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.cookie_samesite', 'Lax');
+    
+    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+        ini_set('session.cookie_secure', '1');
+    }
+}
+
 // Definir timezone
 date_default_timezone_set('America/Sao_Paulo');
 
@@ -73,16 +84,7 @@ if (DEBUG) {
     error_reporting(E_ERROR | E_WARNING | E_PARSE);
 }
 
-// Configurações de sessão segura (ANTES de qualquer saída)
-if (session_status() === PHP_SESSION_NONE) {
-    ini_set('session.cookie_httponly', 1);
-    ini_set('session.use_strict_mode', 1);
-    ini_set('session.cookie_samesite', 'Lax');
-
-    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        ini_set('session.cookie_secure', 1);
-    }
-}
+// Configurações de sessão já definidas no início do arquivo
 
 // Headers de segurança
 if (!headers_sent()) {
