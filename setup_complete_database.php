@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Script completo de configuração do banco de dados SQLite
@@ -17,7 +18,16 @@ try {
     // Ativar foreign keys no SQLite
     $pdo->exec("PRAGMA foreign_keys = ON");
 
-    // Criar tabelas principais
+    // Remover tabelas existentes se houver conflitos
+    $pdo->exec("DROP TABLE IF EXISTS ordens_servico");
+    $pdo->exec("DROP TABLE IF EXISTS agendamentos");
+    $pdo->exec("DROP TABLE IF EXISTS servicos");
+    $pdo->exec("DROP TABLE IF EXISTS categorias_servicos");
+    $pdo->exec("DROP TABLE IF EXISTS veiculos");
+    $pdo->exec("DROP TABLE IF EXISTS clientes");
+    echo "🗑️ Tabelas antigas removidas\n";
+
+    // Criar tabelas principais com estrutura correta
     $sql = "
     -- Tabela de usuários
     CREATE TABLE IF NOT EXISTS usuarios (
@@ -75,27 +85,26 @@ try {
         FOREIGN KEY (id_cliente) REFERENCES clientes(id)
     );
 
-    -- Tabela de categorias de serviços
+    -- Tabela de categorias de serviços (usando nomes corretos das colunas)
     CREATE TABLE IF NOT EXISTS categorias_servicos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome VARCHAR(100) NOT NULL,
+        id_categoria INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome_categoria VARCHAR(100) NOT NULL,
         descricao TEXT,
-        ativo BOOLEAN DEFAULT 1
+        status VARCHAR(20) DEFAULT 'ativo'
     );
 
-    -- Tabela de serviços
+    -- Tabela de serviços (usando nomes corretos das colunas)
     CREATE TABLE IF NOT EXISTS servicos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_servico INTEGER PRIMARY KEY AUTOINCREMENT,
         id_categoria INTEGER,
-        nome VARCHAR(150) NOT NULL,
+        nome_servico VARCHAR(150) NOT NULL,
         descricao TEXT,
         preco DECIMAL(10,2) NOT NULL,
-        duracao INTEGER NOT NULL,
+        duracao_estimada INTEGER NOT NULL,
         tipo_veiculo VARCHAR(20) DEFAULT 'todos',
-        ativo BOOLEAN DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (id_categoria) REFERENCES categorias_servicos(id)
+        status VARCHAR(20) DEFAULT 'ativo',
+        data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (id_categoria) REFERENCES categorias_servicos(id_categoria)
     );
 
     -- Tabela de agendamentos
@@ -113,7 +122,7 @@ try {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (id_cliente) REFERENCES clientes(id),
         FOREIGN KEY (id_veiculo) REFERENCES veiculos(id),
-        FOREIGN KEY (id_servico) REFERENCES servicos(id),
+        FOREIGN KEY (id_servico) REFERENCES servicos(id_servico),
         FOREIGN KEY (usuario_cadastro) REFERENCES usuarios(id)
     );
 
@@ -247,7 +256,7 @@ try {
     ];
 
     foreach ($categorias as $categoria) {
-        $stmt = $pdo->prepare("INSERT OR IGNORE INTO categorias_servicos (nome, descricao) VALUES (?, ?)");
+        $stmt = $pdo->prepare("INSERT OR IGNORE INTO categorias_servicos (nome_categoria, descricao) VALUES (?, ?)");
         $stmt->execute($categoria);
     }
     echo "✅ Categorias de serviços inseridas\n";
@@ -264,7 +273,7 @@ try {
     ];
 
     foreach ($servicos as $servico) {
-        $stmt = $pdo->prepare("INSERT OR IGNORE INTO servicos (id_categoria, nome, descricao, preco, duracao, tipo_veiculo) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $pdo->prepare("INSERT OR IGNORE INTO servicos (id_categoria, nome_servico, descricao, preco, duracao_estimada, tipo_veiculo) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->execute($servico);
     }
     echo "✅ Serviços básicos inseridos\n\n";
