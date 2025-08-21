@@ -536,16 +536,12 @@ function definirConfiguracao($chave, $valor, $descricao = null, $tipo = 'texto',
     try {
         $db = getDB();
         
-        $sql = "INSERT INTO configuracoes (chave, valor, descricao, tipo, categoria) 
-                VALUES (?, ?, ?, ?, ?) 
-                ON DUPLICATE KEY UPDATE 
-                valor = VALUES(valor), 
-                descricao = VALUES(descricao), 
-                tipo = VALUES(tipo), 
-                categoria = VALUES(categoria)";
+        // Para SQLite - usar INSERT OR REPLACE
+        $sql = "INSERT OR REPLACE INTO configuracoes (chave, valor, updated_at) 
+                VALUES (?, ?, CURRENT_TIMESTAMP)";
         
         $stmt = $db->prepare($sql);
-        return $stmt->execute([$chave, $valor, $descricao, $tipo, $categoria]);
+        return $stmt->execute([$chave, $valor]);
         
     } catch (Exception $e) {
         error_log("Erro ao definir configuração: " . $e->getMessage());
