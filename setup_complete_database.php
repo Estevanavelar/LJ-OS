@@ -139,7 +139,7 @@ try {
         usuario_conclusao INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (id_cliente) REFERENCES clientes(id),
-        FOREIGNKEY (id_veiculo) REFERENCES veiculos(id),
+        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id),
         FOREIGN KEY (id_agendamento) REFERENCES agendamentos(id),
         FOREIGN KEY (usuario_abertura) REFERENCES usuarios(id),
         FOREIGN KEY (usuario_conclusao) REFERENCES usuarios(id)
