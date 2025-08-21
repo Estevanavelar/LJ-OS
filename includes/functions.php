@@ -63,7 +63,14 @@ function verificarLogin() {
     }
 }
 
-// CSRF - função movida para security.php para evitar duplicação
+// CSRF - funções de segurança
+function csrf_token() {
+    iniciarSessaoSegura();
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
 
 function csrf_field() {
     $token = csrf_token();
