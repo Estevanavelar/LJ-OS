@@ -31,39 +31,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($acao === 'adicionar') {
             $stmt = $pdo->prepare("
-                INSERT INTO servicos (id_categoria, nome_servico, descricao, preco, duracao_estimada, tipo_veiculo, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO servicos (categoria, nome, descricao, preco, tempo_estimado) 
+                VALUES (?, ?, ?, ?, ?)
             ");
             $stmt->execute([
-                $_POST['id_categoria'],
-                $_POST['nome_servico'],
+                $_POST['categoria'] ?? 'geral',
+                $_POST['nome'],
                 $_POST['descricao'],
                 $_POST['preco'],
-                $_POST['duracao_estimada'],
-                $_POST['tipo_veiculo'],
-                'ativo'
+                $_POST['tempo_estimado']
             ]);
             $sucesso = "Serviço adicionado com sucesso!";
             
         } elseif ($acao === 'editar' && $id_servico) {
             $stmt = $pdo->prepare("
                 UPDATE servicos 
-                SET id_categoria = ?, nome_servico = ?, descricao = ?, preco = ?, duracao_estimada = ?, tipo_veiculo = ?
-                WHERE id_servico = ?
+                SET categoria = ?, nome = ?, descricao = ?, preco = ?, tempo_estimado = ?
+                WHERE id = ?
             ");
             $stmt->execute([
-                $_POST['id_categoria'],
-                $_POST['nome_servico'],
+                $_POST['categoria'] ?? 'geral',
+                $_POST['nome'],
                 $_POST['descricao'],
                 $_POST['preco'],
-                $_POST['duracao_estimada'],
-                $_POST['tipo_veiculo'],
+                $_POST['tempo_estimado'],
                 $id_servico
             ]);
             $sucesso = "Serviço atualizado com sucesso!";
             
         } elseif ($acao === 'excluir' && $id_servico) {
-            $stmt = $pdo->prepare("UPDATE servicos SET status = 'inativo' WHERE id_servico = ?");
+            $stmt = $pdo->prepare("UPDATE servicos SET ativo = 0 WHERE id = ?");
             $stmt->execute([$id_servico]);
             $sucesso = "Serviço removido com sucesso!";
         }
@@ -72,24 +69,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Buscar categorias
-$categorias = [];
-try {
-    $stmt = $pdo->query("SELECT id_categoria, nome_categoria FROM categorias_servicos WHERE status = 'ativo' ORDER BY nome_categoria");
-    $categorias = $stmt->fetchAll();
-} catch (Exception $e) {
-    $erro = "Erro ao carregar categorias: " . $e->getMessage();
-}
-
 // Buscar serviços
 $servicos = [];
 try {
     $stmt = $pdo->query("
-        SELECT s.*, c.nome_categoria 
-        FROM servicos s 
-        LEFT JOIN categorias_servicos c ON s.id_categoria = c.id_categoria 
-        WHERE s.status = 'ativo' 
-        ORDER BY s.nome_servico
+        SELECT * FROM servicos 
+        WHERE ativo = 1 
+        ORDER BY nome
     ");
     $servicos = $stmt->fetchAll();
 } catch (Exception $e) {
@@ -100,7 +86,7 @@ try {
 $servico_editar = null;
 if ($acao === 'editar' && $id_servico) {
     try {
-        $stmt = $pdo->prepare("SELECT * FROM servicos WHERE id_servico = ?");
+        $stmt = $pdo->prepare("SELECT * FROM servicos WHERE id = ?");
         $stmt->execute([$id_servico]);
         $servico_editar = $stmt->fetch();
     } catch (Exception $e) {
@@ -150,21 +136,18 @@ if ($acao === 'editar' && $id_servico) {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="nome_servico">Nome do Serviço *</label>
-                                    <input type="text" class="form-control" id="nome_servico" name="nome_servico" 
-                                           value="<?php echo htmlspecialchars($servico_editar['nome_servico'] ?? ''); ?>" required>
+                                    <label for="nome">Nome do Serviço *</label>
+                                    <input type="text" class="form-control" id="nome" name="nome" 
+                                           value="<?php echo htmlspecialchars($servico_editar['nome'] ?? ''); ?>" required>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="id_categoria">Categoria</label>
-                                    <select class="form-control" id="id_categoria" name="id_categoria">
-                                        <option value="">Selecione uma categoria</option>
-                                        <?php foreach ($categorias as $categoria): ?>
-                                            <option value="<?php echo $categoria['id_categoria']; ?>" 
-                                                    <?php echo ($servico_editar['id_categoria'] ?? '') == $categoria['id_categoria'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($categoria['nome_categoria']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
+                                    <label for="categoria">Categoria</label>
+                                    <select class="form-control" id="categoria" name="categoria">
+                                        <option value="geral" <?php echo ($servico_editar['categoria'] ?? 'geral') == 'geral' ? 'selected' : ''; ?>>Geral</option>
+                                        <option value="lavagem" <?php echo ($servico_editar['categoria'] ?? '') == 'lavagem' ? 'selected' : ''; ?>>Lavagem</option>
+                                        <option value="enceramento" <?php echo ($servico_editar['categoria'] ?? '') == 'enceramento' ? 'selected' : ''; ?>>Enceramento</option>
+                                        <option value="higienizacao" <?php echo ($servico_editar['categoria'] ?? '') == 'higienizacao' ? 'selected' : ''; ?>>Higienização</option>
                                     </select>
                                 </div>
 
@@ -177,19 +160,9 @@ if ($acao === 'editar' && $id_servico) {
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="duracao_estimada">Duração Estimada (minutos) *</label>
-                                    <input type="number" class="form-control" id="duracao_estimada" name="duracao_estimada" 
-                                           value="<?php echo htmlspecialchars($servico_editar['duracao_estimada'] ?? ''); ?>" required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="tipo_veiculo">Tipo de Veículo</label>
-                                    <select class="form-control" id="tipo_veiculo" name="tipo_veiculo">
-                                        <option value="todos" <?php echo ($servico_editar['tipo_veiculo'] ?? '') == 'todos' ? 'selected' : ''; ?>>Todos</option>
-                                        <option value="carro" <?php echo ($servico_editar['tipo_veiculo'] ?? '') == 'carro' ? 'selected' : ''; ?>>Carro</option>
-                                        <option value="moto" <?php echo ($servico_editar['tipo_veiculo'] ?? '') == 'moto' ? 'selected' : ''; ?>>Moto</option>
-                                        <option value="caminhao" <?php echo ($servico_editar['tipo_veiculo'] ?? '') == 'caminhao' ? 'selected' : ''; ?>>Caminhão</option>
-                                    </select>
+                                    <label for="tempo_estimado">Tempo Estimado (minutos) *</label>
+                                    <input type="number" class="form-control" id="tempo_estimado" name="tempo_estimado" 
+                                           value="<?php echo htmlspecialchars($servico_editar['tempo_estimado'] ?? '30'); ?>" required>
                                 </div>
 
                                 <div class="form-group">
@@ -235,8 +208,7 @@ if ($acao === 'editar' && $id_servico) {
                                         <th>Nome do Serviço</th>
                                         <th>Categoria</th>
                                         <th>Preço</th>
-                                        <th>Duração</th>
-                                        <th>Tipo de Veículo</th>
+                                        <th>Tempo</th>
                                         <th>Ações</th>
                                     </tr>
                                 </thead>
@@ -244,13 +216,13 @@ if ($acao === 'editar' && $id_servico) {
                                     <?php foreach ($servicos as $servico): ?>
                                         <tr>
                                             <td>
-                                                <strong><?php echo htmlspecialchars($servico['nome_servico']); ?></strong>
+                                                <strong><?php echo htmlspecialchars($servico['nome']); ?></strong>
                                                 <?php if ($servico['descricao']): ?>
                                                     <br><small class="text-muted"><?php echo htmlspecialchars($servico['descricao']); ?></small>
                                                 <?php endif; ?>
                                             </td>
                                             <td>
-                                                <?php echo htmlspecialchars($servico['nome_categoria'] ?? 'Sem categoria'); ?>
+                                                <?php echo ucfirst(htmlspecialchars($servico['categoria'] ?? 'Geral')); ?>
                                             </td>
                                             <td>
                                                 <span class="badge badge-success">
@@ -258,26 +230,15 @@ if ($acao === 'editar' && $id_servico) {
                                                 </span>
                                             </td>
                                             <td>
-                                                <?php echo $servico['duracao_estimada']; ?> min
-                                            </td>
-                                            <td>
-                                                <?php
-                                                $tipo_labels = [
-                                                    'todos' => 'Todos',
-                                                    'carro' => 'Carro',
-                                                    'moto' => 'Moto',
-                                                    'caminhao' => 'Caminhão'
-                                                ];
-                                                echo $tipo_labels[$servico['tipo_veiculo']] ?? 'Todos';
-                                                ?>
+                                                <?php echo $servico['tempo_estimado']; ?> min
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="?acao=editar&id=<?php echo $servico['id_servico']; ?>" 
+                                                    <a href="?acao=editar&id=<?php echo $servico['id']; ?>" 
                                                        class="btn btn-sm btn-outline-primary" title="Editar">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="?acao=excluir&id=<?php echo $servico['id_servico']; ?>" 
+                                                    <a href="?acao=excluir&id=<?php echo $servico['id']; ?>" 
                                                        class="btn btn-sm btn-outline-danger" title="Remover"
                                                        onclick="return confirm('Tem certeza que deseja remover este serviço?')">
                                                         <i class="fas fa-trash"></i>
