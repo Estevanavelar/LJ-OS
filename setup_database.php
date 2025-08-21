@@ -40,7 +40,7 @@ try {
     );
 
     CREATE TABLE IF NOT EXISTS servicos (
-        id INTEGER PRIMARY PRIMARY KEY AUTOINCREMENT,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome VARCHAR(100) NOT NULL,
         descricao TEXT,
         preco DECIMAL(10,2) NOT NULL,
