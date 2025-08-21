@@ -28,14 +28,6 @@ try {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
-    CREATE TABLE IF NOT EXISTS configuracoes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chave VARCHAR(100) UNIQUE NOT NULL,
-        valor TEXT,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-    
     CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome VARCHAR(100) NOT NULL,
@@ -64,9 +56,10 @@ try {
     
     CREATE TABLE IF NOT EXISTS servicos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome VARCHAR(150) NOT NULL,
+        nome VARCHAR(100) NOT NULL,
+        descricao TEXT,
         preco DECIMAL(10,2) NOT NULL,
-        duracao INTEGER NOT NULL,
+        tempo_estimado INTEGER DEFAULT 30,
         ativo BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -86,18 +79,6 @@ try {
         FOREIGN KEY (id_cliente) REFERENCES clientes(id),
         FOREIGN KEY (id_veiculo) REFERENCES veiculos(id),
         FOREIGN KEY (usuario_abertura) REFERENCES usuarios(id)
-    );EFAULT CURRENT_TIMESTAMP
-    );
-    
-    CREATE TABLE IF NOT EXISTS servicos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome VARCHAR(100) NOT NULL,
-        descricao TEXT,
-        preco DECIMAL(10,2) NOT NULL,
-        tempo_estimado INTEGER DEFAULT 30,
-        ativo BOOLEAN DEFAULT 1,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
     CREATE TABLE IF NOT EXISTS configuracoes (
@@ -124,6 +105,24 @@ try {
         echo "   Senha: admin123\n";
     }
     
+    // Inserir serviços básicos
+    $servicos_exists = $pdo->query("SELECT COUNT(*) FROM servicos")->fetchColumn();
+    
+    if ($servicos_exists == 0) {
+        $servicos = [
+            ['Lavagem Simples', 'Lavagem externa básica', 15.00, 30],
+            ['Lavagem Completa', 'Lavagem completa com enceramento', 25.00, 45],
+            ['Higienização Interna', 'Limpeza e higienização do interior', 30.00, 60],
+            ['Enceramento', 'Aplicação de cera protetora', 20.00, 30]
+        ];
+        
+        $stmt = $pdo->prepare("INSERT INTO servicos (nome, descricao, preco, tempo_estimado) VALUES (?, ?, ?, ?)");
+        foreach ($servicos as $servico) {
+            $stmt->execute($servico);
+        }
+        echo "✅ Serviços básicos inseridos\n";
+    }
+    
     // Inserir configurações básicas
     $configs = [
         'nome_empresa' => 'LJ-OS Sistema',
@@ -141,6 +140,9 @@ try {
     echo "✅ Configurações básicas inseridas\n";
     echo "\n🎉 Sistema configurado com sucesso!\n";
     echo "💡 Acesse o sistema através do navegador\n";
+    echo "🌐 URL: https://" . $_SERVER['HTTP_HOST'] . "\n";
+    echo "👤 Login: admin@lavajato.com\n";
+    echo "🔑 Senha: admin123\n";
     
 } catch (Exception $e) {
     echo "❌ Erro: " . $e->getMessage() . "\n";
