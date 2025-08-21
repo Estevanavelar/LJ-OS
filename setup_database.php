@@ -148,3 +148,4 @@ try {
     echo "❌ Erro: " . $e->getMessage() . "\n";
     exit(1);
 }
+?>
