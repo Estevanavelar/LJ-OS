@@ -8,8 +8,7 @@ require_once 'config/config.php';
 require_once 'includes/security.php';
 require_once 'includes/auth.php';
 
-// Iniciar sessão
-iniciarSessaoSegura();
+// A sessão já foi iniciada em config/config.php
 
 // Se já estiver logado, redirecionar para dashboard
 if (estaLogado()) {

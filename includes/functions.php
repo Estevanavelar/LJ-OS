@@ -4,12 +4,11 @@
  * LJ-OS Sistema para Lava Jato
  */
 
-// Função para iniciar sessão segura (será chamada quando necessário)
+// Função para verificar se a sessão está ativa (não inicia mais sessão)
 function iniciarSessaoSegura() {
-    if (session_status() == PHP_SESSION_NONE) {
-        // Iniciar sessão sem configurações avançadas para evitar conflito
-        session_start();
-    }
+    // A sessão já é iniciada em config/config.php
+    // Esta função agora apenas verifica se está ativa
+    return (session_status() === PHP_SESSION_ACTIVE);
 }
 
 // Incluir configuração do banco de dados
@@ -38,8 +37,10 @@ aplicarHeadersSeguros();
 
 // Helpers de autenticação
 function estaLogado(): bool {
-    iniciarSessaoSegura();
-    return isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_logado']);
+    // A sessão já foi iniciada em config/config.php
+    return (session_status() === PHP_SESSION_ACTIVE) && 
+           isset($_SESSION['usuario_id']) && 
+           !empty($_SESSION['usuario_logado']);
 }
 
 /**
@@ -54,7 +55,10 @@ function verificarLogin() {
 
 // CSRF - funções de segurança
 function csrf_token() {
-    iniciarSessaoSegura();
+    // A sessão já foi iniciada em config/config.php
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return '';
+    }
     if (!isset($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
