@@ -94,7 +94,7 @@ if (!headers_sent()) {
     }
 }
 
-// Criar diretórios necessários
+// Criar diretórios necessários (será feito após inicialização da sessão)
 $required_dirs = [
     __DIR__ . '/../uploads',
     __DIR__ . '/../uploads/clientes',
@@ -105,12 +105,6 @@ $required_dirs = [
     __DIR__ . '/../backup',
     __DIR__ . '/../temp'
 ];
-
-foreach ($required_dirs as $dir) {
-    if (!file_exists($dir)) {
-        mkdir($dir, 0755, true);
-    }
-}
 
 // Logs de erro
 ini_set('log_errors', 1);

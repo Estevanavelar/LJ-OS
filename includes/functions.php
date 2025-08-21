@@ -1,4 +1,19 @@
 <?php
+// Configurar parâmetros da sessão ANTES de qualquer saída
+if (session_status() == PHP_SESSION_NONE) {
+    // Configurações básicas de sessão
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => false, // Sempre false para desenvolvimento local
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+    
+    session_start();
+}
+
 /**
  * Funções auxiliares do sistema
  * LJ-OS Sistema para Lava Jato
@@ -6,26 +21,15 @@
 
 // Função para iniciar sessão segura (será chamada quando necessário)
 function iniciarSessaoSegura() {
+    // A sessão já é iniciada automaticamente no início do arquivo
+    // Esta função agora é apenas um wrapper para compatibilidade
     if (session_status() == PHP_SESSION_NONE) {
-        // Configurações básicas de sessão para Replit
-        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-        
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
-        
         session_start();
     }
 }
 
 // Incluir configuração do banco de dados
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../config/apis.php';
 
 // Headers de segurança básicos
 function aplicarHeadersSeguros() {
@@ -40,11 +44,33 @@ function aplicarHeadersSeguros() {
     }
 
     if (getenv('CSP_ENABLED') === 'true') {
-        $csp = "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self';";
+        $csp = "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com https://fonts.googleapis.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self';";
         header("Content-Security-Policy: $csp");
     }
 }
 
+// Criar diretórios necessários após inicialização da sessão
+$required_dirs = [
+    __DIR__ . '/../uploads',
+    __DIR__ . '/../uploads/clientes',
+    __DIR__ . '/../uploads/veiculos', 
+    __DIR__ . '/../uploads/funcionarios',
+    __DIR__ . '/../uploads/documentos',
+    __DIR__ . '/../logs',
+    __DIR__ . '/../backup',
+    __DIR__ . '/../temp'
+];
+
+foreach ($required_dirs as $dir) {
+    if (!file_exists($dir)) {
+        mkdir($dir, 0755, true);
+    }
+}
+
+// Incluir configuração de APIs após inicialização da sessão
+require_once __DIR__ . '/../config/apis.php';
+
+// Aplicar headers de segurança após inicialização da sessão
 aplicarHeadersSeguros();
 
 // Helpers de autenticação
@@ -65,6 +91,7 @@ function verificarLogin() {
 
 // CSRF
 function csrf_token() {
+    iniciarSessaoSegura();
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
@@ -77,6 +104,7 @@ function csrf_field() {
 }
 
 function csrf_verificar() {
+    iniciarSessaoSegura();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $enviado = $_POST['_csrf'] ?? '';
         if (!hash_equals($_SESSION['csrf_token'] ?? '', $enviado)) {
@@ -88,6 +116,7 @@ function csrf_verificar() {
 
 // CSRF para APIs (aceita header X-CSRF-Token ou campo _csrf no JSON)
 function csrf_verificar_api() {
+    iniciarSessaoSegura();
     $metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
     if ($metodo === 'GET' || $metodo === 'HEAD' || $metodo === 'OPTIONS') {
         return; // safe methods

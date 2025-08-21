@@ -13,7 +13,7 @@ try {
     $pdo = getDB();
     
     echo "✅ Conexão com SQLite estabelecida\n";
-    echo "📁 Banco: " . DB_PATH . "\n\n";
+    echo "📁 Banco: " . __DIR__ . "/database/lj_os.db\n\n";
     
     // Criar tabelas básicas
     $sql = "

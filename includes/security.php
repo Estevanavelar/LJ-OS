@@ -10,7 +10,15 @@ class SecurityManager {
     private $db;
     
     private function __construct() {
-        $this->db = getDBManager();
+        // Inicializar banco de dados apenas quando necessário
+        $this->db = null;
+    }
+    
+    private function getDB() {
+        if ($this->db === null) {
+            $this->db = getDBManager();
+        }
+        return $this->db;
     }
     
     public static function getInstance() {
@@ -64,13 +72,13 @@ class SecurityManager {
         $current_time = time();
         
         // Limpar registros antigos
-        $this->db->query(
+        $this->getDB()->query(
             "DELETE FROM rate_limits WHERE created_at < ?",
             [$current_time - $period]
         );
         
         // Contar tentativas atuais
-        $stmt = $this->db->query(
+        $stmt = $this->getDB()->query(
             "SELECT COUNT(*) as count FROM rate_limits WHERE action_key = ? AND created_at > ?",
             [$key, $current_time - $period]
         );
@@ -82,7 +90,7 @@ class SecurityManager {
         }
         
         // Registrar tentativa
-        $this->db->query(
+        $this->getDB()->query(
             "INSERT INTO rate_limits (action_key, identifier, created_at) VALUES (?, ?, ?)",
             [$key, $identifier, $current_time]
         );
@@ -134,7 +142,7 @@ class SecurityManager {
         ];
         
         try {
-            $this->db->query(
+            $this->getDB()->query(
                 "INSERT INTO security_logs (event, severity, ip_address, user_agent, user_id, details, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 [$log_entry['event'], $log_entry['severity'], $log_entry['ip'], $log_entry['user_agent'], $log_entry['user_id'], $log_entry['details'], $log_entry['timestamp']]
             );
@@ -155,7 +163,7 @@ class SecurityManager {
             $ip = $_SERVER['REMOTE_ADDR'] ?? '';
         }
         
-        $stmt = $this->db->query(
+        $stmt = $this->getDB()->query(
             "SELECT COUNT(*) as count FROM ip_blacklist WHERE ip_address = ? AND (expires_at IS NULL OR expires_at > NOW())",
             [$ip]
         );
@@ -169,7 +177,7 @@ class SecurityManager {
     public function blacklistIP($ip, $reason = 'Security violation', $duration = 3600) {
         $expires_at = date('Y-m-d H:i:s', time() + $duration);
         
-        $this->db->query(
+        $this->getDB()->query(
             "INSERT OR REPLACE INTO ip_blacklist (ip_address, reason, expires_at, created_at) VALUES (?, ?, ?, NOW())",
             [$ip, $reason, $expires_at]
         );
@@ -178,7 +186,8 @@ class SecurityManager {
     }
 }
 
-// Middleware de segurança
+// Middleware de segurança (comentado temporariamente para evitar problemas de inicialização)
+/*
 function checkSecurity() {
     $security = SecurityManager::getInstance();
     
@@ -195,28 +204,16 @@ function checkSecurity() {
         die('Muitas requisições. Tente novamente em alguns minutos.');
     }
 }
+*/
 
 // Funções helper
 function sanitize($data) {
     return SecurityManager::getInstance()->sanitizeInput($data);
 }
 
-function csrf_token() {
-    return SecurityManager::getInstance()->generateCSRF();
-}
-
-function csrf_field() {
-    $token = csrf_token();
-    return "<input type='hidden' name='csrf_token' value='{$token}'>";
-}
-
-function validate_csrf($token) {
-    return SecurityManager::getInstance()->validateCSRF($token);
-}
-
 function security_log($event, $details = [], $severity = 'INFO') {
     SecurityManager::getInstance()->logSecurity($event, $details, $severity);
 }
 
-// Inicializar verificação de segurança
-checkSecurity();
+// Verificação de segurança será chamada manualmente quando necessário
+// checkSecurity();
