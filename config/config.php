@@ -1,21 +1,36 @@
 <?php
 /**
- * Configurações Gerais do Sistema
- * LJ-OS Sistema para Lava Jato
+ * Configuração Principal do Sistema LJ-OS
+ * Sistema completo para gestão de lava jato
  */
 
-// Configurações de sessão
-ini_set('session.cookie_httponly', 1);
-ini_set('session.use_strict_mode', 1);
-ini_set('session.cookie_samesite', 'Strict');
+// Iniciar buffer de saída para evitar problemas com headers
+ob_start();
+
+// Configurações de sessão PRIMEIRO (antes de qualquer saída)
+if (session_status() === PHP_SESSION_NONE) {
+    // Configurações básicas para Replit
+    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $secure,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+
+    session_start();
+}
+
+// Definir timezone
+date_default_timezone_set('America/Sao_Paulo');
 
 // Configurações de segurança
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
-
-// Timezone
-date_default_timezone_set('America/Sao_Paulo');
 
 // Configurações do sistema
 define('SISTEMA_NOME', 'LJ-OS Sistema para Lava Jato');

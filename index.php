@@ -1,9 +1,11 @@
-
 <?php
 /**
- * Página inicial do sistema LJ-OS
- * Redireciona para instalação se não estiver configurado
+ * LJ-OS Sistema para Lava Jato
+ * Página Principal
  */
+
+require_once 'config/config.php';
+require_once 'includes/functions.php';
 
 // Verificar se o sistema está instalado
 if (!file_exists('config/installed.lock')) {
@@ -61,20 +63,20 @@ if (!file_exists('config/installed.lock')) {
         <div class="container">
             <h1>🚗 LJ-OS Sistema para Lava Jato</h1>
             <p>Sistema de gestão completo para lava jatos</p>
-            
+
             <div class="status">
                 <strong>✅ Sistema Pronto</strong><br>
                 O ambiente está preparado para instalação
             </div>
-            
+
             <a href="setup_database.php" class="btn">
                 🚀 Configurar Sistema
             </a>
-            
+
             <a href="install.php" class="btn">
                 ⚙️ Instalação Avançada
             </a>
-            
+
             <p><small>Versão 1.0.0 - Ambiente Replit</small></p>
         </div>
     </body>
@@ -84,9 +86,6 @@ if (!file_exists('config/installed.lock')) {
 }
 
 // Sistema instalado - verificar login
-require_once 'config/config.php';
-
-// Verificar se está logado
 session_start();
 if (isset($_SESSION['usuario_logado']) && $_SESSION['usuario_logado'] === true) {
     header('Location: dashboard.php');

@@ -7,18 +7,7 @@
 // Função para iniciar sessão segura (será chamada quando necessário)
 function iniciarSessaoSegura() {
     if (session_status() == PHP_SESSION_NONE) {
-        // Configurações básicas de sessão para Replit
-        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-        
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
-        
+        // Iniciar sessão sem configurações avançadas para evitar conflito
         session_start();
     }
 }
