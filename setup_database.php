@@ -28,6 +28,14 @@ try {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     
+    CREATE TABLE IF NOT EXISTS configuracoes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chave VARCHAR(100) UNIQUE NOT NULL,
+        valor TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    
     CREATE TABLE IF NOT EXISTS clientes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome VARCHAR(100) NOT NULL,
@@ -38,6 +46,47 @@ try {
         ativo BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS veiculos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_cliente INTEGER NOT NULL,
+        placa VARCHAR(10) UNIQUE NOT NULL,
+        marca VARCHAR(50) NOT NULL,
+        modelo VARCHAR(100) NOT NULL,
+        ano INTEGER NOT NULL,
+        cor VARCHAR(30) NOT NULL,
+        ativo BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (id_cliente) REFERENCES clientes(id)
+    );
+    
+    CREATE TABLE IF NOT EXISTS servicos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome VARCHAR(150) NOT NULL,
+        preco DECIMAL(10,2) NOT NULL,
+        duracao INTEGER NOT NULL,
+        ativo BOOLEAN DEFAULT 1,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE IF NOT EXISTS ordens_servico (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        codigo VARCHAR(20) UNIQUE NOT NULL,
+        id_cliente INTEGER NOT NULL,
+        id_veiculo INTEGER NOT NULL,
+        data_abertura DATETIME DEFAULT CURRENT_TIMESTAMP,
+        data_conclusao DATETIME NULL,
+        status VARCHAR(20) DEFAULT 'aberta',
+        valor_total DECIMAL(10,2) DEFAULT 0.00,
+        observacoes TEXT,
+        usuario_abertura INTEGER NULL,
+        FOREIGN KEY (id_cliente) REFERENCES clientes(id),
+        FOREIGN KEY (id_veiculo) REFERENCES veiculos(id),
+        FOREIGN KEY (usuario_abertura) REFERENCES usuarios(id)
+    );EFAULT CURRENT_TIMESTAMP
     );
     
     CREATE TABLE IF NOT EXISTS servicos (

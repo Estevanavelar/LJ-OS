@@ -1,32 +1,49 @@
-
 <?php
 /**
  * Configuração Principal do Sistema LJ-OS
  * Sistema completo para gestão de lava jato
  */
 
+// Iniciar buffer de saída para evitar problemas com headers
+ob_start();
+
+// Configurações de sessão PRIMEIRO (antes de qualquer saída)
+if (session_status() === PHP_SESSION_NONE) {
+    // Configurações básicas para Replit
+    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => '',
+        'secure' => $secure,
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+
+    session_start();
+}
+
 // Definir timezone
 date_default_timezone_set('America/Sao_Paulo');
 
-// Configurações do sistema
-define('SYSTEM_NAME', 'LJ-OS - Sistema para Lava Jato');
-define('SYSTEM_VERSION', '2.0.0');
-define('SYSTEM_AUTHOR', 'LJ-OS Development Team');
-
-// Configurações de ambiente
-define('ENVIRONMENT', getenv('ENVIRONMENT') ?: 'development');
-define('DEBUG', ENVIRONMENT === 'development');
-
 // Configurações de segurança
-define('SESSION_LIFETIME', 3600); // 1 hora
-define('MAX_LOGIN_ATTEMPTS', 5);
-define('LOGIN_LOCKOUT_TIME', 900); // 15 minutos
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
 
-// Configurações de upload
-define('UPLOAD_MAX_SIZE', 10 * 1024 * 1024); // 10MB
-define('ALLOWED_FILE_TYPES', ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx']);
+// Configurações do sistema
+define('SISTEMA_NOME', 'LJ-OS Sistema para Lava Jato');
+define('SISTEMA_VERSAO', '1.0.0');
+define('SISTEMA_AMBIENTE', 'desenvolvimento');
 
-// URLs e caminhos
+// Diretórios
+define('DIR_ROOT', dirname(__DIR__));
+define('DIR_UPLOADS', DIR_ROOT . '/uploads');
+define('DIR_LOGS', DIR_ROOT . '/logs');
+define('DIR_TEMP', DIR_ROOT . '/temp');
+
+// URLs
 if (isset($_SERVER['HTTP_HOST'])) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
     define('BASE_URL', $protocol . $_SERVER['HTTP_HOST']);
@@ -34,9 +51,11 @@ if (isset($_SERVER['HTTP_HOST'])) {
     define('BASE_URL', 'http://localhost:5000');
 }
 
-define('UPLOAD_PATH', __DIR__ . '/../uploads/');
-define('LOG_PATH', __DIR__ . '/../logs/');
+// Configurações de upload
+define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5MB
+define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx']);
 
+<<<<<<< HEAD
 // Configurações de email (para futuras implementações)
 define('SMTP_HOST', getenv('SMTP_HOST') ?: 'localhost');
 define('SMTP_PORT', getenv('SMTP_PORT') ?: 587);
@@ -123,3 +142,7 @@ spl_autoload_register(function ($class) {
 require_once __DIR__ . '/database.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/security.php';
+=======
+// Status de instalação
+define('SISTEMA_INSTALADO', file_exists(__DIR__ . '/installed.lock'));
+>>>>>>> 3f92fb9d821d8bf3d28c65e373833e3c475c5bc8

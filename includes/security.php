@@ -211,6 +211,16 @@ function sanitize($data) {
     return SecurityManager::getInstance()->sanitizeInput($data);
 }
 
+<<<<<<< HEAD
+=======
+// csrf_token() já está definida em functions.php
+// csrf_field() já está definida em functions.php
+
+function validate_csrf($token) {
+    return SecurityManager::getInstance()->validateCSRF($token);
+}
+
+>>>>>>> 3f92fb9d821d8bf3d28c65e373833e3c475c5bc8
 function security_log($event, $details = [], $severity = 'INFO') {
     SecurityManager::getInstance()->logSecurity($event, $details, $severity);
 }

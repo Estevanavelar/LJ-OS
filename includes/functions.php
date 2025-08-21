@@ -19,13 +19,19 @@ if (session_status() == PHP_SESSION_NONE) {
  * LJ-OS Sistema para Lava Jato
  */
 
-// Função para iniciar sessão segura (será chamada quando necessário)
+// Função para verificar se a sessão está ativa (não inicia mais sessão)
 function iniciarSessaoSegura() {
+<<<<<<< HEAD
     // A sessão já é iniciada automaticamente no início do arquivo
     // Esta função agora é apenas um wrapper para compatibilidade
     if (session_status() == PHP_SESSION_NONE) {
         session_start();
     }
+=======
+    // A sessão já é iniciada em config/config.php
+    // Esta função agora apenas verifica se está ativa
+    return (session_status() === PHP_SESSION_ACTIVE);
+>>>>>>> 3f92fb9d821d8bf3d28c65e373833e3c475c5bc8
 }
 
 // Incluir configuração do banco de dados
@@ -75,8 +81,10 @@ aplicarHeadersSeguros();
 
 // Helpers de autenticação
 function estaLogado(): bool {
-    iniciarSessaoSegura();
-    return isset($_SESSION['usuario_id']) && !empty($_SESSION['usuario_logado']);
+    // A sessão já foi iniciada em config/config.php
+    return (session_status() === PHP_SESSION_ACTIVE) && 
+           isset($_SESSION['usuario_id']) && 
+           !empty($_SESSION['usuario_logado']);
 }
 
 /**
@@ -89,10 +97,18 @@ function verificarLogin() {
     }
 }
 
-// CSRF
+// CSRF - funções de segurança
 function csrf_token() {
+<<<<<<< HEAD
     iniciarSessaoSegura();
     if (empty($_SESSION['csrf_token'])) {
+=======
+    // A sessão já foi iniciada em config/config.php
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        return '';
+    }
+    if (!isset($_SESSION['csrf_token'])) {
+>>>>>>> 3f92fb9d821d8bf3d28c65e373833e3c475c5bc8
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     return $_SESSION['csrf_token'];
@@ -571,16 +587,12 @@ function definirConfiguracao($chave, $valor, $descricao = null, $tipo = 'texto',
     try {
         $db = getDB();
         
-        $sql = "INSERT INTO configuracoes (chave, valor, descricao, tipo, categoria) 
-                VALUES (?, ?, ?, ?, ?) 
-                ON DUPLICATE KEY UPDATE 
-                valor = VALUES(valor), 
-                descricao = VALUES(descricao), 
-                tipo = VALUES(tipo), 
-                categoria = VALUES(categoria)";
+        // Para SQLite - usar INSERT OR REPLACE
+        $sql = "INSERT OR REPLACE INTO configuracoes (chave, valor, updated_at) 
+                VALUES (?, ?, CURRENT_TIMESTAMP)";
         
         $stmt = $db->prepare($sql);
-        return $stmt->execute([$chave, $valor, $descricao, $tipo, $categoria]);
+        return $stmt->execute([$chave, $valor]);
         
     } catch (Exception $e) {
         error_log("Erro ao definir configuração: " . $e->getMessage());

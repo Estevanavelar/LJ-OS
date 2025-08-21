@@ -17,6 +17,9 @@ $db_config = [
     'sqlite_path' => __DIR__ . '/../database/lj_os.db'
 ];
 
+// Definir constante DB_PATH para compatibilidade
+define('DB_PATH', $db_config['sqlite_path']);
+
 /**
  * Classe de Banco de Dados Universal
  */
