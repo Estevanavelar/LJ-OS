@@ -41,11 +41,14 @@ try {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
-    -- Tabela de configurações (estrutura simples para SQLite)
+    -- Tabela de configurações (estrutura completa para SQLite)
     CREATE TABLE IF NOT EXISTS configuracoes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         chave VARCHAR(100) UNIQUE NOT NULL,
         valor TEXT,
+        descricao TEXT,
+        tipo VARCHAR(20) DEFAULT 'texto',
+        categoria VARCHAR(50),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
