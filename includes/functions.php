@@ -7,18 +7,7 @@
 // Função para iniciar sessão segura (será chamada quando necessário)
 function iniciarSessaoSegura() {
     if (session_status() == PHP_SESSION_NONE) {
-        // Configurações básicas de sessão para Replit
-        $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
-        
-        session_set_cookie_params([
-            'lifetime' => 0,
-            'path' => '/',
-            'domain' => '',
-            'secure' => $secure,
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]);
-        
+        // Iniciar sessão sem configurações avançadas para evitar conflito
         session_start();
     }
 }
@@ -63,7 +52,14 @@ function verificarLogin() {
     }
 }
 
-// CSRF - função movida para security.php para evitar duplicação
+// CSRF - funções de segurança
+function csrf_token() {
+    iniciarSessaoSegura();
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
 
 function csrf_field() {
     $token = csrf_token();

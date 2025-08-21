@@ -201,10 +201,7 @@ function sanitize($data) {
     return SecurityManager::getInstance()->sanitizeInput($data);
 }
 
-function csrf_token() {
-    return SecurityManager::getInstance()->generateCSRF();
-}
-
+// csrf_token() já está definida em functions.php
 // csrf_field() já está definida em functions.php
 
 function validate_csrf($token) {
