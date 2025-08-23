@@ -1,0 +1,289 @@
+/**
+ * LJ-OS - Sistema de Temas e Contraste
+ */
+
+/* ===== VARIÁVEIS CSS PARA TEMAS ===== */
+:root {
+    /* Cores base - Modo Claro */
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    
+    /* Cores de fundo - Modo Claro */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f8f9fa;
+    --bg-header: #ffffff;
+    
+    /* Cores de texto - Modo Claro */
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --text-muted: #6c757d;
+    --text-light: #ffffff;
+    --text-dark: #212529;
+    
+    /* Cores de borda - Modo Claro */
+    --border-color: #dee2e6;
+    --border-light: #e9ecef;
+    --border-dark: #adb5bd;
+    
+    /* Sombras - Modo Claro */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    
+    /* Transições */
+    --transition-speed: 0.3s;
+    --transition-timing: ease-in-out;
+}
+
+/* ===== MODO ESCURO ===== */
+[data-theme="dark"] {
+    /* Cores de fundo - Modo Escuro */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #404040;
+    --bg-card: #2d2d2d;
+    --bg-sidebar: #1a1a1a;
+    --bg-header: #1a1a1a;
+    
+    /* Cores de texto - Modo Escuro */
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --text-muted: #808080;
+    --text-light: #ffffff;
+    --text-dark: #e0e0e0;
+    
+    /* Cores de borda - Modo Escuro */
+    --border-color: #404040;
+    --border-light: #505050;
+    --border-dark: #606060;
+    
+    /* Sombras - Modo Escuro */
+    --shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.3);
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.5);
+}
+
+/* ===== CONTRASTE ALTO ===== */
+[data-contrast="high"] {
+    --text-primary: #000000;
+    --text-secondary: #000000;
+    --text-muted: #000000;
+    --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #ffffff;
+    --border-color: #000000;
+    --border-light: #000000;
+    --border-dark: #000000;
+}
+
+[data-theme="dark"][data-contrast="high"] {
+    --text-primary: #ffffff;
+    --text-secondary: #ffffff;
+    --text-muted: #ffffff;
+    --bg-primary: #000000;
+    --bg-secondary: #000000;
+    --bg-tertiary: #000000;
+    --border-color: #ffffff;
+    --border-light: #ffffff;
+    --border-dark: #ffffff;
+}
+
+/* ===== CONTRASTE BAIXO ===== */
+[data-contrast="low"] {
+    --text-primary: #666666;
+    --text-secondary: #888888;
+    --text-muted: #aaaaaa;
+    --border-color: #cccccc;
+    --border-light: #dddddd;
+    --border-dark: #bbbbbb;
+}
+
+[data-theme="dark"][data-contrast="low"] {
+    --text-primary: #cccccc;
+    --text-secondary: #aaaaaa;
+    --text-muted: #888888;
+    --border-color: #666666;
+    --border-light: #555555;
+    --border-dark: #777777;
+}
+
+/* ===== TAMANHOS DE FONTE ===== */
+[data-font-size="small"] {
+    font-size: 0.875rem;
+}
+
+[data-font-size="medium"] {
+    font-size: 1rem;
+}
+
+[data-font-size="large"] {
+    font-size: 1.125rem;
+}
+
+/* ===== APLICAÇÃO DAS VARIÁVEIS ===== */
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color var(--transition-speed) var(--transition-timing),
+                color var(--transition-speed) var(--transition-timing);
+}
+
+.card, .card-body {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.navbar, .navbar-expand-lg {
+    background-color: var(--bg-header) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar {
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+}
+
+.table {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.table th,
+.table td {
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: var(--bg-secondary);
+}
+
+.form-control, .form-select {
+    background-color: var(--bg-primary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-primary);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.btn {
+    transition: all var(--transition-speed) var(--transition-timing);
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--border-color);
+}
+
+.dropdown-menu {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.alert {
+    border-color: var(--border-color);
+}
+
+.badge {
+    color: var(--text-light);
+}
+
+/* ===== UTILITÁRIOS DE TEMA ===== */
+.theme-toggle {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-speed) var(--transition-timing);
+}
+
+.theme-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+.contrast-toggle {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-speed) var(--transition-timing);
+}
+
+.contrast-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+.language-toggle {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color var(--transition-speed) var(--transition-timing);
+}
+
+.language-toggle:hover {
+    background-color: var(--bg-secondary);
+}
+
+/* ===== ANIMAÇÕES DE TRANSIÇÃO ===== */
+* {
+    transition: background-color var(--transition-speed) var(--transition-timing),
+                color var(--transition-speed) var(--transition-timing),
+                border-color var(--transition-speed) var(--transition-timing),
+                box-shadow var(--transition-speed) var(--transition-timing);
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .theme-toggle,
+    .contrast-toggle,
+    .language-toggle {
+        padding: 0.375rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* ===== ACESSIBILIDADE ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
+
+/* ===== IMPRESSÃO ===== */
+@media print {
+    [data-theme="dark"] {
+        --bg-primary: #ffffff;
+        --bg-secondary: #ffffff;
+        --bg-card: #ffffff;
+        --text-primary: #000000;
+        --text-secondary: #000000;
+        --border-color: #000000;
+    }
+}

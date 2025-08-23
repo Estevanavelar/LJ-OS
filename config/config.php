@@ -49,4 +49,12 @@ return [
         'secure' => false,
         'httponly' => true,
     ],
+    
+    // Configurações JWT
+    'jwt' => [
+        'secret' => $_ENV['JWT_SECRET'] ?? 'lj-os-secret-key-2024',
+        'expiration' => $_ENV['JWT_EXPIRATION'] ?? 3600,
+        'refresh_expiration' => $_ENV['JWT_REFRESH_EXPIRATION'] ?? 604800,
+        'algorithm' => 'HS256'
+    ],
 ];

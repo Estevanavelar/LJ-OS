@@ -48,35 +48,9 @@ $requestUri = parse_url($requestUri, PHP_URL_PATH);
 // Roteamento simples
 switch ($requestUri) {
     case '/':
-        echo '<!DOCTYPE html>
-        <html lang="pt-BR">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>LJ-OS - Sistema</title>
-            <style>
-                body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-                .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                h1 { color: #333; text-align: center; }
-                .info { background: #e8f4fd; padding: 20px; border-radius: 5px; margin: 20px 0; }
-                .status { color: #28a745; font-weight: bold; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>🚀 LJ-OS Sistema</h1>
-                <div class="info">
-                    <p><strong>Status:</strong> <span class="status">✅ Funcionando!</span></p>
-                    <p><strong>Versão:</strong> ' . $config['app']['version'] . '</p>
-                    <p><strong>Ambiente:</strong> ' . $config['app']['environment'] . '</p>
-                    <p><strong>PHP:</strong> ' . PHP_VERSION . '</p>
-                    <p><strong>Servidor:</strong> ' . ($_SERVER['SERVER_SOFTWARE'] ?? 'PHP CLI') . '</p>
-                    <p><strong>Data/Hora:</strong> ' . date('d/m/Y H:i:s') . '</p>
-                </div>
-                <p>🎉 Sistema configurado com sucesso! O projeto LJ-OS está rodando.</p>
-            </div>
-        </body>
-        </html>';
+        // Redirecionar para login
+        header('Location: /login.php');
+        exit();
         break;
         
     case '/api/status':
