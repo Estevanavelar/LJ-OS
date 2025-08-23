@@ -1,0 +1,39 @@
+# Dependências do Composer
+/vendor/
+composer.lock
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.production
+
+# Logs
+/logs/*
+!logs/.gitkeep
+
+# Cache
+/cache/
+/tmp/
+
+# Arquivos de teste
+/coverage/
+.phpunit.result.cache
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.log
+
+# Configurações locais
+config/local.php
+config/database.local.php

@@ -1,0 +1,548 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// MODELOS PRINCIPAIS
+// ========================================
+
+model Usuario {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(100)
+  senha         String   @db.VarChar(255)
+  nivelAcesso   NivelAcesso @default(FUNCIONARIO)
+  status        Status   @default(ATIVO)
+  dataCadastro  DateTime @default(now())
+  ultimoLogin   DateTime?
+  fotoPerfil    String?  @db.VarChar(255)
+  telefone      String?  @db.VarChar(20)
+  observacoes   String?
+  
+  // Relacionamentos
+  funcionario   Funcionario?
+  ordensServico OrdemServico[]
+  agendamentos  Agendamento[]
+  logs          LogAuditoria[]
+  
+  @@map("usuarios")
+}
+
+model Cliente {
+  id                Int      @id @default(autoincrement())
+  nome              String   @db.VarChar(150)
+  tipoPessoa        TipoPessoa @default(PF)
+  cpfCnpj          String   @unique @db.VarChar(20)
+  rgIe             String?  @db.VarChar(20)
+  telefone         String   @db.VarChar(20)
+  email            String?  @db.VarChar(100)
+  endereco         String?
+  cep              String?  @db.VarChar(10)
+  cidade           String?  @db.VarChar(100)
+  estado           String?  @db.VarChar(2)
+  dataNascimento   DateTime?
+  dataCadastro     DateTime @default(now())
+  status           Status   @default(ATIVO)
+  observacoes      String?
+  programaFidelidade Boolean @default(false)
+  pontosFidelidade Int      @default(0)
+  
+  // Relacionamentos
+  veiculos         Veiculo[]
+  agendamentos     Agendamento[]
+  ordensServico    OrdemServico[]
+  cupons           CupomCliente[]
+  
+  @@map("clientes")
+}
+
+model Veiculo {
+  id            Int      @id @default(autoincrement())
+  idCliente     Int
+  placa         String   @unique @db.VarChar(10)
+  marca         String   @db.VarChar(50)
+  modelo        String   @db.VarChar(100)
+  ano           Int
+  anoModelo     Int?
+  cor           String   @db.VarChar(30)
+  combustivel   TipoCombustivel?
+  kmAtual       Int?
+  observacoes   String?
+  dataCadastro  DateTime @default(now())
+  status        Status   @default(ATIVO)
+  
+  // Relacionamentos
+  cliente       Cliente  @relation(fields: [idCliente], references: [id], onDelete: Cascade)
+  agendamentos  Agendamento[]
+  ordensServico OrdemServico[]
+  
+  @@map("veiculos")
+}
+
+model CategoriaServico {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.VarChar(100)
+  descricao     String?
+  status        Status   @default(ATIVO)
+  
+  // Relacionamentos
+  servicos      Servico[]
+  
+  @@map("categorias_servicos")
+}
+
+model Servico {
+  id                Int      @id @default(autoincrement())
+  idCategoria       Int?
+  nome              String   @db.VarChar(150)
+  descricao         String?
+  preco             Decimal  @db.Decimal(10, 2)
+  duracaoEstimada   Int      // em minutos
+  tipoVeiculo       TipoVeiculo @default(TODOS)
+  status            Status   @default(ATIVO)
+  dataCadastro      DateTime @default(now())
+  
+  // Relacionamentos
+  categoria         CategoriaServico? @relation(fields: [idCategoria], references: [id], onDelete: SetNull)
+  agendamentos      Agendamento[]
+  itensOS           ItemOrdemServico[]
+  
+  @@map("servicos")
+}
+
+model Agendamento {
+  id                    Int      @id @default(autoincrement())
+  idCliente             Int
+  idVeiculo             Int
+  idServico             Int
+  dataAgendamento       DateTime
+  horaEntregaEstimada   DateTime?
+  status                StatusAgendamento @default(AGENDADO)
+  observacoes           String?
+  dataCriacao           DateTime @default(now())
+  
+  // Relacionamentos
+  cliente               Cliente  @relation(fields: [idCliente], references: [id])
+  veiculo               Veiculo  @relation(fields: [idVeiculo], references: [id])
+  servico               Servico  @relation(fields: [idServico], references: [id])
+  
+  @@map("agendamentos")
+}
+
+model OrdemServico {
+  id            Int      @id @default(autoincrement())
+  idCliente     Int
+  idVeiculo     Int
+  idFuncionario Int?
+  numeroOS      String   @unique @db.VarChar(20)
+  dataAbertura  DateTime @default(now())
+  dataConclusao DateTime?
+  status        StatusOS @default(ABERTA)
+  valorTotal    Decimal  @default(0) @db.Decimal(10, 2)
+  desconto      Decimal  @default(0) @db.Decimal(10, 2)
+  valorFinal    Decimal  @default(0) @db.Decimal(10, 2)
+  observacoes   String?
+  
+  // Relacionamentos
+  cliente       Cliente  @relation(fields: [idCliente], references: [id])
+  veiculo       Veiculo  @relation(fields: [idVeiculo], references: [id])
+  funcionario   Funcionario? @relation(fields: [idFuncionario], references: [id])
+  itens         ItemOrdemServico[]
+  pagamentos    Pagamento[]
+  
+  @@map("ordens_servico")
+}
+
+model ItemOrdemServico {
+  id            Int      @id @default(autoincrement())
+  idOS          Int
+  idServico     Int
+  quantidade    Int      @default(1)
+  precoUnitario Decimal  @db.Decimal(10, 2)
+  desconto      Decimal  @default(0) @db.Decimal(10, 2)
+  valorTotal    Decimal  @db.Decimal(10, 2)
+  observacoes   String?
+  
+  // Relacionamentos
+  ordemServico  OrdemServico @relation(fields: [idOS], references: [id], onDelete: Cascade)
+  servico       Servico  @relation(fields: [idServico], references: [id])
+  
+  @@map("itens_ordem_servico")
+}
+
+model Funcionario {
+  id                Int      @id @default(autoincrement())
+  idUsuario         Int      @unique
+  nome              String   @db.VarChar(100)
+  cpf               String   @unique @db.VarChar(14)
+  rg                String?  @db.VarChar(20)
+  dataNascimento    DateTime?
+  dataAdmissao      DateTime @default(now())
+  cargo             String   @db.VarChar(100)
+  departamento      String   @db.VarChar(100)
+  salario           Decimal? @db.Decimal(10, 2)
+  telefone          String   @db.VarChar(20)
+  email             String   @db.VarChar(100)
+  endereco          String?
+  foto              String?  @db.VarChar(255)
+  status            Status   @default(ATIVO)
+  
+  // Relacionamentos
+  usuario           Usuario  @relation(fields: [idUsuario], references: [id])
+  ordensServico     OrdemServico[]
+  movimentacoesEstoque MovimentacaoEstoque[]
+  
+  @@map("funcionarios")
+}
+
+model CategoriaProduto {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.VarChar(100)
+  descricao     String?
+  status        Status   @default(ATIVO)
+  
+  // Relacionamentos
+  produtos      Produto[]
+  
+  @@map("categorias_produtos")
+}
+
+model Produto {
+  id                Int      @id @default(autoincrement())
+  idCategoria       Int?
+  codigo            String   @unique @db.VarChar(50)
+  codigoBarras      String?  @unique @db.VarChar(50)
+  nome              String   @db.VarChar(150)
+  descricao         String?
+  marca             String?  @db.VarChar(100)
+  modelo            String?  @db.VarChar(100)
+  tamanho           String?  @db.VarChar(50)
+  precoCusto        Decimal  @db.Decimal(10, 2)
+  precoVenda        Decimal  @db.Decimal(10, 2)
+  margem            Decimal  @db.Decimal(5, 2)
+  estoqueMinimo     Int      @default(0)
+  estoqueMaximo     Int?
+  unidadeMedida     String   @db.VarChar(20)
+  localizacao       String?  @db.VarChar(100)
+  status            Status   @default(ATIVO)
+  dataCadastro      DateTime @default(now())
+  
+  // Relacionamentos
+  categoria         CategoriaProduto? @relation(fields: [idCategoria], references: [id], onDelete: SetNull)
+  movimentacoes     MovimentacaoEstoque[]
+  
+  @@map("produtos")
+}
+
+model MovimentacaoEstoque {
+  id                Int      @id @default(autoincrement())
+  idProduto         Int
+  idFuncionario     Int?
+  tipo              TipoMovimentacao
+  quantidade        Int
+  precoUnitario     Decimal  @db.Decimal(10, 2)
+  valorTotal        Decimal  @db.Decimal(10, 2)
+  motivo            String   @db.VarChar(200)
+  observacoes       String?
+  dataMovimentacao  DateTime @default(now())
+  
+  // Relacionamentos
+  produto           Produto  @relation(fields: [idProduto], references: [id])
+  funcionario       Funcionario? @relation(fields: [idFuncionario], references: [id])
+  
+  @@map("movimentacoes_estoque")
+}
+
+model Fornecedor {
+  id                Int      @id @default(autoincrement())
+  nome              String   @db.VarChar(150)
+  cnpj              String   @unique @db.VarChar(18)
+  inscricaoEstadual String?  @db.VarChar(20)
+  telefone          String   @db.VarChar(20)
+  email             String?  @db.VarChar(100)
+  endereco          String?
+  cidade            String?  @db.VarChar(100)
+  estado            String?  @db.VarChar(2)
+  cep               String?  @db.VarChar(10)
+  contato           String?  @db.VarChar(100)
+  status            Status   @default(ATIVO)
+  dataCadastro      DateTime @default(now())
+  
+  @@map("fornecedores")
+}
+
+model CategoriaFinanceira {
+  id            Int      @id @default(autoincrement())
+  nome          String   @db.VarChar(100)
+  tipo          TipoFinanceiro
+  descricao     String?
+  status        Status   @default(ATIVO)
+  
+  // Relacionamentos
+  receitas      Receita[]
+  despesas      Despesa[]
+  
+  @@map("categorias_financeiras")
+}
+
+model Receita {
+  id                Int      @id @default(autoincrement())
+  idCategoria       Int?
+  idOS              Int?
+  descricao         String   @db.VarChar(200)
+  valor             Decimal  @db.Decimal(10, 2)
+  dataRecebimento   DateTime
+  formaPagamento    FormaPagamento
+  observacoes       String?
+  dataCadastro      DateTime @default(now())
+  
+  // Relacionamentos
+  categoria         CategoriaFinanceira? @relation(fields: [idCategoria], references: [id], onDelete: SetNull)
+  ordemServico      OrdemServico? @relation(fields: [idOS], references: [id], onDelete: SetNull)
+  
+  @@map("receitas")
+}
+
+model Despesa {
+  id                Int      @id @default(autoincrement())
+  idCategoria       Int
+  descricao         String   @db.VarChar(200)
+  valor             Decimal  @db.Decimal(10, 2)
+  dataVencimento    DateTime
+  dataPagamento     DateTime?
+  formaPagamento    FormaPagamento?
+  observacoes       String?
+  dataCadastro      DateTime @default(now())
+  
+  // Relacionamentos
+  categoria         CategoriaFinanceira @relation(fields: [idCategoria], references: [id])
+  
+  @@map("despesas")
+}
+
+model Pagamento {
+  id                Int      @id @default(autoincrement())
+  idOS              Int
+  valor             Decimal  @db.Decimal(10, 2)
+  formaPagamento    FormaPagamento
+  dataPagamento     DateTime @default(now())
+  observacoes       String?
+  
+  // Relacionamentos
+  ordemServico      OrdemServico @relation(fields: [idOS], references: [id], onDelete: Cascade)
+  
+  @@map("pagamentos")
+}
+
+model Cupom {
+  id                Int      @id @default(autoincrement())
+  codigo            String   @unique @db.VarChar(50)
+  descricao         String   @db.VarChar(200)
+  tipo              TipoCupom
+  valor             Decimal  @db.Decimal(10, 2)
+  percentual        Decimal? @db.Decimal(5, 2)
+  dataInicio        DateTime
+  dataFim           DateTime
+  usoMaximo         Int?
+  usoAtual          Int      @default(0)
+  status            Status   @default(ATIVO)
+  dataCadastro      DateTime @default(now())
+  
+  // Relacionamentos
+  cuponsClientes    CupomCliente[]
+  
+  @@map("cupons")
+}
+
+model CupomCliente {
+  id                Int      @id @default(autoincrement())
+  idCupom           Int
+  idCliente         Int
+  dataUso           DateTime @default(now())
+  valorDesconto     Decimal  @db.Decimal(10, 2)
+  
+  // Relacionamentos
+  cupom             Cupom    @relation(fields: [idCupom], references: [id])
+  cliente           Cliente  @relation(fields: [idCliente], references: [id])
+  
+  @@map("cupons_clientes")
+}
+
+model LogAuditoria {
+  id                Int      @id @default(autoincrement())
+  idUsuario         Int
+  acao              String   @db.VarChar(100)
+  tabela            String   @db.VarChar(100)
+  registroId        Int?
+  dadosAnteriores   String?
+  dadosNovos        String?
+  ipAddress         String?  @db.VarChar(45)
+  userAgent         String?
+  dataAcao          DateTime @default(now())
+  
+  // Relacionamentos
+  usuario           Usuario  @relation(fields: [idUsuario], references: [id])
+  
+  @@map("logs_auditoria")
+}
+
+model Configuracao {
+  id            Int      @id @default(autoincrement())
+  chave         String   @unique @db.VarChar(100)
+  valor         String   @db.Text
+  categoria     String   @db.VarChar(100)
+  descricao     String?
+  dataCadastro  DateTime @default(now())
+  
+  @@map("configuracoes")
+}
+
+// ========================================
+// ENUMS
+// ========================================
+
+enum Status {
+  ATIVO
+  INATIVO
+}
+
+enum NivelAcesso {
+  ADMIN
+  GERENTE
+  ATENDENTE
+  FUNCIONARIO
+}
+
+enum TipoPessoa {
+  PF
+  PJ
+}
+
+enum TipoCombustivel {
+  GASOLINA
+  ETANOL
+  DIESEL
+  FLEX
+  GNV
+  ELETRICO
+  HIBRIDO
+}
+
+enum TipoVeiculo {
+  CARRO
+  MOTO
+  CAMINHAO
+  TODOS
+}
+
+enum StatusAgendamento {
+  AGENDADO
+  CONFIRMADO
+  EM_ANDAMENTO
+  CONCLUIDO
+  CANCELADO
+}
+
+enum StatusOS {
+  ABERTA
+  EM_ANDAMENTO
+  CONCLUIDA
+  CANCELADA
+}
+
+enum TipoMovimentacao {
+  ENTRADA
+  SAIDA
+  TRANSFERENCIA
+  AJUSTE
+}
+
+enum TipoFinanceiro {
+  RECEITA
+  DESPESA
+}
+
+enum FormaPagamento {
+  DINHEIRO
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  PIX
+  TRANSFERENCIA
+  BOLETO
+}
+
+enum TipoCupom {
+  VALOR_FIXO
+  PERCENTUAL
+}
+
+// ========================================
+// ÍNDICES E OTIMIZAÇÕES
+// ========================================
+
+// Índices para melhorar performance de consultas
+model Cliente {
+  @@index([cpfCnpj])
+  @@index([telefone])
+  @@index([status])
+  @@index([dataCadastro])
+}
+
+model Veiculo {
+  @@index([placa])
+  @@index([idCliente])
+  @@index([marca, modelo])
+}
+
+model Agendamento {
+  @@index([dataAgendamento])
+  @@index([status])
+  @@index([idCliente, idVeiculo])
+}
+
+model OrdemServico {
+  @@index([numeroOS])
+  @@index([status])
+  @@index([dataAbertura])
+  @@index([idCliente])
+}
+
+model Produto {
+  @@index([codigo])
+  @@index([codigoBarras])
+  @@index([idCategoria])
+  @@index([status])
+}
+
+model MovimentacaoEstoque {
+  @@index([idProduto])
+  @@index([tipo])
+  @@index([dataMovimentacao])
+}
+
+model Receita {
+  @@index([dataRecebimento])
+  @@index([idCategoria])
+  @@index([formaPagamento])
+}
+
+model Despesa {
+  @@index([dataVencimento])
+  @@index([idCategoria])
+  @@index([status])
+}
+
+model LogAuditoria {
+  @@index([idUsuario])
+  @@index([acao])
+  @@index([tabela])
+  @@index([dataAcao])
+}

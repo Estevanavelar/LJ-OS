@@ -1,0 +1,413 @@
+flowchart TD
+    %% ========================================
+    %% PÁGINA INICIAL E AUTENTICAÇÃO
+    %% ========================================
+    A[🏠 Página Inicial] --> B{Usuário já logado?}
+    B -->|Não| C[🔐 Tela de Login]
+    B -->|Sim| D[📊 Dashboard Principal]
+    
+    C --> C1[📱 Campo Email]
+    C --> C2[🔒 Campo Senha]
+    C --> C3[👁️ Botão Mostrar/Ocultar Senha]
+    C --> C4[✅ Botão Entrar]
+    C --> C5[❓ Esqueci minha senha]
+    C --> C6[📱 Login com Biometria]
+    
+    C4 --> C7{Validação de Credenciais}
+    C7 -->|Sucesso| D
+    C7 -->|Falha| C8[⚠️ Mensagem de Erro]
+    C8 --> C
+    
+    C5 --> C9[📧 Recuperação de Senha]
+    C9 --> C10[📱 Campo Email/Telefone]
+    C10 --> C11[📤 Enviar Código]
+    C11 --> C12[🔢 Campo Código de Verificação]
+    C12 --> C13[🔑 Nova Senha]
+    C13 --> C
+    
+    %% ========================================
+    %% DASHBOARD PRINCIPAL
+    %% ========================================
+    D --> D1[📈 KPIs Principais]
+    D --> D2[📅 Calendário de Agendamentos]
+    D --> D3[🚗 Veículos em Atendimento]
+    D --> D4[💰 Resumo Financeiro]
+    D --> D5[📊 Gráficos de Performance]
+    D --> D6[🔔 Notificações]
+    D --> D7[⚙️ Menu Principal]
+    
+    D1 --> D1a[👥 Total de Clientes]
+    D1 --> D1b[🔧 OS em Andamento]
+    D1 --> D1c[📅 Agendamentos Hoje]
+    D1 --> D1d[💵 Receita do Dia]
+    
+    D2 --> D2a[📅 Visualizar Mês/Semana/Dia]
+    D2 --> D2b[➕ Novo Agendamento]
+    D2 --> D2c[✏️ Editar Agendamento]
+    D2 --> D2d[❌ Cancelar Agendamento]
+    
+    D6 --> D6a[🔴 Alertas Críticos]
+    D6 --> D6b[🟡 Avisos Importantes]
+    D6 --> D6c[🟢 Informações Gerais]
+    
+    %% ========================================
+    %% MENU PRINCIPAL
+    %% ========================================
+    D7 --> E[👥 Gestão de Clientes]
+    D7 --> F[🚗 Controle de Veículos]
+    D7 --> G[📅 Agendamentos]
+    D7 --> H[🔧 Ordens de Serviço]
+    D7 --> I[📦 Controle de Estoque]
+    D7 --> J[💰 Módulo Financeiro]
+    D7 --> K[👨‍💼 Gestão de Funcionários]
+    D7 --> L[📊 Relatórios]
+    D7 --> M[⚙️ Configurações]
+    D7 --> N[👤 Perfil do Usuário]
+    
+    %% ========================================
+    %% GESTÃO DE CLIENTES
+    %% ========================================
+    E --> E1[📋 Lista de Clientes]
+    E --> E2[➕ Novo Cliente]
+    E --> E3[🔍 Buscar Cliente]
+    E --> E4[📊 Relatórios de Clientes]
+    
+    E1 --> E1a[📱 Filtros: Nome, CPF, Status]
+    E1 --> E1b[📊 Paginação]
+    E1 --> E1c[📤 Exportar Lista]
+    E1 --> E1d[✏️ Editar Cliente]
+    E1 --> E1e[👁️ Visualizar Perfil]
+    E1 --> E1f[❌ Desativar Cliente]
+    
+    E2 --> E2a[👤 Dados Pessoais]
+    E2a --> E2a1[📝 Nome Completo]
+    E2a --> E2a2[🆔 Tipo: PF/PJ]
+    E2a2 --> E2a3[📄 CPF/CNPJ]
+    E2a2 --> E2a4[📋 RG/IE]
+    E2a --> E2a5[📱 Telefone]
+    E2a --> E2a6[📧 Email]
+    E2a --> E2a7[📍 Endereço Completo]
+    E2a --> E2a8[📅 Data de Nascimento]
+    E2a --> E2a9[💎 Programa de Fidelidade]
+    E2a --> E2a10[📸 Upload de Documentos]
+    E2a --> E2a11[💭 Observações]
+    E2a --> E2a12[💾 Salvar Cliente]
+    
+    E3 --> E3a[🔍 Campo de Busca]
+    E3a --> E3b[📱 Busca por Nome]
+    E3a --> E3c[🆔 Busca por CPF/CNPJ]
+    E3a --> E3d[🚗 Busca por Placa]
+    E3a --> E3e[📱 Busca por Telefone]
+    E3e --> E3f[📋 Resultados Filtrados]
+    
+    %% ========================================
+    %% CONTROLE DE VEÍCULOS
+    %% ========================================
+    F --> F1[🚗 Lista de Veículos]
+    F --> F2[➕ Novo Veículo]
+    F --> F3[🔍 Buscar Veículo]
+    F --> F4[📊 Histórico de Serviços]
+    
+    F2 --> F2a[👤 Selecionar Cliente]
+    F2a --> F2b[🚗 Dados do Veículo]
+    F2b --> F2b1[🔢 Placa]
+    F2b --> F2b2[🏭 Marca]
+    F2b --> F2b2[🚙 Modelo]
+    F2b --> F2b3[📅 Ano]
+    F2b --> F2b4[🎨 Cor]
+    F2b --> F2b5[⛽ Combustível]
+    F2b --> F2b6[📏 KM Atual]
+    F2b --> F2b7[📸 Fotos do Veículo]
+    F2b --> F2b8[💭 Observações]
+    F2b --> F2b9[💾 Salvar Veículo]
+    
+    %% ========================================
+    %% AGENDAMENTOS
+    %% ========================================
+    G --> G1[📅 Calendário Interativo]
+    G --> G2[➕ Novo Agendamento]
+    G --> G3[📋 Lista de Agendamentos]
+    G --> G4[📊 Relatórios de Agenda]
+    
+    G1 --> G1a[📅 Visualização: Mês/Semana/Dia]
+    G1a --> G1b[🔴 Agendamentos Confirmados]
+    G1a --> G1c[🟡 Agendamentos Pendentes]
+    G1a --> G1d[🟢 Agendamentos Concluídos]
+    G1a --> G1e[❌ Agendamentos Cancelados]
+    G1a --> G1f[👆 Drag & Drop para Reagendar]
+    
+    G2 --> G2a[👤 Selecionar Cliente]
+    G2a --> G2b[🚗 Selecionar Veículo]
+    G2b --> G2c[🔧 Selecionar Serviço]
+    G2c --> G2d[📅 Escolher Data]
+    G2d --> G2e[⏰ Escolher Horário]
+    G2e --> G2f[💰 Ver Preço]
+    G2f --> G2g[⏱️ Ver Tempo Estimado]
+    G2g --> G2h[💭 Adicionar Observações]
+    G2h --> G2i[📱 Notificação WhatsApp/SMS]
+    G2i --> G2j[💾 Confirmar Agendamento]
+    
+    %% ========================================
+    %% ORDENS DE SERVIÇO
+    %% ========================================
+    H --> H1[🔧 Lista de OS]
+    H --> H2[➕ Nova Ordem de Serviço]
+    H --> H3[📊 Status das OS]
+    H --> H4[📋 Histórico Completo]
+    
+    H2 --> H2a[👤 Cliente Selecionado]
+    H2a --> H2b[🚗 Veículo Selecionado]
+    H2b --> H2c[🔧 Serviços Selecionados]
+    H2c --> H2d[💰 Cálculo Automático]
+    H2d --> H2e[🎫 Aplicar Cupom]
+    H2e --> H2f[💸 Aplicar Desconto]
+    H2f --> H2g[👨‍💼 Atribuir Funcionário]
+    H2g --> H2h[📅 Definir Prazo]
+    H2h --> H2i[💭 Observações]
+    H2i --> H2j[🖨️ Imprimir OS]
+    H2j --> H2k[📱 Enviar para Cliente]
+    
+    H3 --> H3a[🔴 Aberta]
+    H3a --> H3b[🟡 Em Andamento]
+    H3b --> H3c[🟢 Concluída]
+    H3c --> H3d[❌ Cancelada]
+    
+    %% ========================================
+    %% CONTROLE DE ESTOQUE
+    %% ========================================
+    I --> I1[📦 Lista de Produtos]
+    I --> I2[➕ Novo Produto]
+    I --> I3[📥 Entrada de Produto]
+    I --> I4[📤 Saída de Produto]
+    I --> I5[📊 Relatórios de Estoque]
+    
+    I2 --> I2a[📝 Nome do Produto]
+    I2a --> I2b[🏷️ Categoria]
+    I2b --> I2c[🔢 Código Interno]
+    I2c --> I2d[📊 Código de Barras]
+    I2d --> I2e[🏭 Marca/Modelo]
+    I2e --> I2f[💰 Preço de Custo]
+    I2f --> I2g[💵 Preço de Venda]
+    I2g --> I2h[📏 Unidade de Medida]
+    I2h --> I2i[📦 Estoque Mínimo]
+    I2i --> I2j[📍 Localização]
+    I2j --> I2k[📸 Foto do Produto]
+    I2k --> I2l[💾 Salvar Produto]
+    
+    I3 --> I3a[📦 Selecionar Produto]
+    I3a --> I3b[🔢 Quantidade]
+    I3b --> I3c[💰 Preço Unitário]
+    I3c --> I3d[🏢 Fornecedor]
+    I3d --> I3e[📅 Data de Validade]
+    I3e --> I3f[💭 Motivo da Entrada]
+    I3f --> I3g[💾 Registrar Entrada]
+    
+    %% ========================================
+    %% MÓDULO FINANCEIRO
+    %% ========================================
+    J --> J1[💰 Receitas]
+    J --> J2[💸 Despesas]
+    J --> J3[📊 Fluxo de Caixa]
+    J --> J4[📈 Relatórios Financeiros]
+    J --> J5[🎫 Cupons e Descontos]
+    
+    J1 --> J1a[➕ Nova Receita]
+    J1a --> J1b[📝 Descrição]
+    J1b --> J1c[💰 Valor]
+    J1c --> J1d[📅 Data de Recebimento]
+    J1d --> J1e[💳 Forma de Pagamento]
+    J1e --> J1f[🏷️ Categoria]
+    J1f --> J1g[🔗 Vincular à OS]
+    J1g --> J1h[💾 Registrar Receita]
+    
+    J2 --> J2a[➕ Nova Despesa]
+    J2a --> J2b[📝 Descrição]
+    J2b --> J2c[💰 Valor]
+    J2c --> J2d[📅 Data de Vencimento]
+    J2d --> J2e[💳 Forma de Pagamento]
+    J2e --> J2f[🏷️ Categoria]
+    J2f --> J2g[💾 Registrar Despesa]
+    
+    J3 --> J3a[📊 Gráfico de Entradas vs Saídas]
+    J3a --> J3b[📅 Filtro por Período]
+    J3b --> J3c[📈 Projeções]
+    
+    %% ========================================
+    %% GESTÃO DE FUNCIONÁRIOS
+    %% ========================================
+    K --> K1[👥 Lista de Funcionários]
+    K --> K2[➕ Novo Funcionário]
+    K --> K3[🔐 Controle de Acesso]
+    K --> K4[📊 Performance]
+    K5[💰 Comissões]
+    
+    K2 --> K2a[👤 Dados Pessoais]
+    K2a --> K2b[💼 Dados Profissionais]
+    K2b --> K2c[🔐 Criar Usuário do Sistema]
+    K2c --> K2d[🔑 Definir Senha]
+    K2d --> K2e[🔒 Configurar Permissões]
+    K2e --> K2f[📧 Enviar Credenciais]
+    
+    K3 --> K3a[👤 Selecionar Usuário]
+    K3a --> K3b[🔒 Nível de Acesso]
+    K3b --> K3c[🔐 Permissões Granulares]
+    K3c --> K3d[📱 Módulos Acessíveis]
+    K3d --> K3e[💾 Salvar Permissões]
+    
+    %% ========================================
+    %% RELATÓRIOS
+    %% ========================================
+    L --> L1[📊 Relatórios Operacionais]
+    L --> L2[💰 Relatórios Financeiros]
+    L --> L3[👥 Relatórios de Clientes]
+    L --> L4[🚗 Relatórios de Veículos]
+    L --> L5[📦 Relatórios de Estoque]
+    L --> L6[👨‍💼 Relatórios de Funcionários]
+    
+    L1 --> L1a[📅 Agendamentos por Período]
+    L1a --> L1b[🔧 OS por Status]
+    L1b --> L1c[⏱️ Tempo Médio de Atendimento]
+    L1c --> L1d[📈 Produtividade]
+    
+    L2 --> L2a[💰 Receitas vs Despesas]
+    L2a --> L2b[📊 Margem de Lucro]
+    L2b --> L2c[📈 Fluxo de Caixa]
+    L2c --> L2d[🎯 ROI por Serviço]
+    
+    L3 --> L3a[👥 Clientes por Segmento]
+    L3a --> L3b[💎 Fidelização]
+    L3b --> L3c[📱 Comportamento de Compra]
+    L3c --> L3d[📍 Distribuição Geográfica]
+    
+    %% ========================================
+    %% CONFIGURAÇÕES
+    %% ========================================
+    M --> M1[🏢 Dados da Empresa]
+    M --> M2[⚙️ Configurações do Sistema]
+    M --> M3[🔔 Notificações]
+    M --> M4[📱 Integrações]
+    M --> M5[💾 Backup e Restauração]
+    M --> M6[🔒 Segurança]
+    
+    M1 --> M1a[🏢 Nome da Empresa]
+    M1a --> M1b[📱 Telefone]
+    M1b --> M1c[📍 Endereço]
+    M1c --> M1d[📅 Horário de Funcionamento]
+    M1d --> M1e[💼 CNPJ]
+    M1e --> M1f[📧 Email]
+    M1f --> M1g[🌐 Website]
+    
+    M2 --> M2a[💎 Sistema de Fidelidade]
+    M2a --> M2b[💰 Configurações de Preços]
+    M2b --> M2c[📅 Configurações de Agenda]
+    M2c --> M2d[🔧 Configurações de OS]
+    
+    M3 --> M3a[📱 WhatsApp]
+    M3a --> M3b[📧 Email]
+    M3b --> M3c[📱 SMS]
+    M3c --> M3d[🔔 Push Notifications]
+    
+    %% ========================================
+    %% PERFIL DO USUÁRIO
+    %% ========================================
+    N --> N1[👤 Dados Pessoais]
+    N --> N2[🔐 Alterar Senha]
+    N --> N3[📱 Preferências]
+    N --> N4[🔒 Segurança]
+    N --> N5[📊 Atividade]
+    N --> N6[🚪 Logout]
+    
+    N1 --> N1a[📝 Nome]
+    N1a --> N1b[📧 Email]
+    N1b --> N1c[📱 Telefone]
+    N1c --> N1d[📸 Foto de Perfil]
+    N1d --> N1e[💾 Salvar Alterações]
+    
+    N2 --> N2a[🔒 Senha Atual]
+    N2a --> N2b[🔑 Nova Senha]
+    N2b --> N2c[🔑 Confirmar Nova Senha]
+    N2c --> N2d[💾 Alterar Senha]
+    
+    N3 --> N3a[🌍 Idioma]
+    N3a --> N3b[🎨 Tema]
+    N3b --> N3c[🔔 Notificações]
+    N3c --> N3d[📱 Biometria]
+    
+    %% ========================================
+    %% NOTIFICAÇÕES E ALERTAS
+    %% ========================================
+    D6 --> O[🔔 Sistema de Notificações]
+    O --> O1[📱 Push Notifications]
+    O --> O2[📧 Email Automático]
+    O --> O3[📱 WhatsApp Business]
+    O --> O4[📱 SMS]
+    
+    O1 --> O1a[🔴 Agendamento Confirmado]
+    O1 --> O1b[🟡 Lembrete de Agendamento]
+    O1c[🟢 OS Concluída]
+    O1 --> O1d[❌ Agendamento Cancelado]
+    O1 --> O1e[⚠️ Estoque Baixo]
+    O1 --> O1f[💰 Pagamento Recebido]
+    
+    %% ========================================
+    %% RESPONSIVIDADE E ACESSIBILIDADE
+    %% ========================================
+    P[📱 Responsividade]
+    P --> P1[💻 Desktop (>1200px)]
+    P --> P2[📱 Tablet (768px-1199px)]
+    P --> P3[📱 Mobile (<767px)]
+    
+    Q[♿ Acessibilidade]
+    Q --> Q1[🔊 Screen Reader]
+    Q --> Q2[⌨️ Navegação por Teclado]
+    Q --> Q3[🎨 Alto Contraste]
+    Q --> Q4[🔍 Zoom de Texto]
+    
+    %% ========================================
+    %% ESTADOS E FEEDBACK
+    %% ========================================
+    R[💬 Estados da Interface]
+    R --> R1[⏳ Loading]
+    R --> R2[✅ Sucesso]
+    R --> R3[❌ Erro]
+    R --> R4[⚠️ Aviso]
+    R --> R5[ℹ️ Informação]
+    
+    S[🎯 Feedback Visual]
+    S --> S1[💚 Verde - Sucesso]
+    S --> S2[🔴 Vermelho - Erro]
+    S --> S3[🟡 Amarelo - Aviso]
+    S --> S4[🔵 Azul - Informação]
+    S --> S5[⚫ Cinza - Desabilitado]
+    
+    %% ========================================
+    %% HELP E SUPORTE
+    %% ========================================
+    T[❓ Help e Suporte]
+    T --> T1[📚 Documentação]
+    T --> T2[🎥 Tutoriais em Vídeo]
+    T --> T3[💬 Chat de Suporte]
+    T --> T4[📧 Email de Suporte]
+    T --> T5[📱 WhatsApp Suporte]
+    T --> T6[📞 Telefone de Suporte]
+    
+    %% ========================================
+    %% ESTILOS E CORES
+    %% ========================================
+    classDef primary fill:#667eea,stroke:#333,stroke-width:2px,color:#fff
+    classDef secondary fill:#764ba2,stroke:#333,stroke-width:2px,color:#fff
+    classDef success fill:#28a745,stroke:#333,stroke-width:2px,color:#fff
+    classDef warning fill:#ffc107,stroke:#333,stroke-width:2px,color:#000
+    classDef danger fill:#dc3545,stroke:#333,stroke-width:2px,color:#fff
+    classDef info fill:#17a2b8,stroke:#333,stroke-width:2px,color:#fff
+    classDef light fill:#f8f9fa,stroke:#333,stroke-width:2px,color:#000
+    classDef dark fill:#343a40,stroke:#333,stroke-width:2px,color:#fff
+    
+    class A,D primary
+    class C,E,F,G,H,I,J,K,L,M,N secondary
+    class C4,C7,E2a12,F2b9,G2j,H2j,I2l,J1h,J2g,K2f,K3e,L1d,L2d,M1g,N1e,N2d success
+    class C8,D6a,E1f,G1e,H3d,I2i,O1e warning
+    class C7 danger
+    class D1,D2,D3,D4,D5,D6 info
+    class E1a,E1b,E1c,F1,F2,F3,G1,G2,G3,H1,H2,H3,I1,I2,I3,J1,J2,J3,K1,K2,K3,L1,L2,L3 light
+    class E2a,F2a,G2a,H2a,I2a,J2a,K2a dark
