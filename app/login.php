@@ -1,11 +1,43 @@
+<?php
+/**
+ * LJ-OS - Página de Login
+ */
+
+// Carregar autoloader
+require_once __DIR__ . '/../autoload.php';
+
+// Carregar sistema de localização
+$localization = LJOS\Utils\Localization::getInstance();
+
+// Aplicar configurações de tema e idioma
+$localization->applySettings();
+
+// Verificar se já está logado
+session_start();
+$token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+
+if ($token) {
+    // Se já tem token, redirecionar para dashboard
+    header('Location: /app/dashboard.php');
+    exit();
+}
+?>
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html <?= $localization->getHtmlAttributes() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LJ-OS - Login</title>
+    <title><?= $localization->get('app_name') ?> - <?= $localization->get('login') ?></title>
+    
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Temas CSS -->
+    <link href="../app/assets/css/themes.css" rel="stylesheet">
+    
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -15,46 +47,32 @@
             justify-content: center;
         }
         
-        .login-container {
-            background: white;
+        .login-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             overflow: hidden;
-            width: 100%;
             max-width: 400px;
+            width: 100%;
         }
         
         .login-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 40px 30px;
+            padding: 2rem;
             text-align: center;
         }
         
-        .login-header h1 {
-            margin: 0;
-            font-size: 2rem;
-            font-weight: 700;
-        }
-        
-        .login-header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
-        }
-        
-        .login-form {
-            padding: 40px 30px;
-        }
-        
-        .form-floating {
-            margin-bottom: 20px;
+        .login-body {
+            padding: 2rem;
         }
         
         .form-control {
             border-radius: 10px;
             border: 2px solid #e9ecef;
-            padding: 15px;
-            font-size: 16px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
         }
         
         .form-control:focus {
@@ -66,254 +84,218 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             border-radius: 10px;
-            padding: 15px;
-            font-size: 16px;
+            padding: 0.75rem 2rem;
             font-weight: 600;
-            width: 100%;
-            margin-top: 10px;
+            transition: all 0.3s ease;
         }
         
         .btn-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
         }
         
         .password-toggle {
             position: absolute;
-            right: 15px;
+            right: 1rem;
             top: 50%;
             transform: translateY(-50%);
             cursor: pointer;
             color: #6c757d;
         }
         
-        .alert {
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .loading {
-            display: none;
-        }
-        
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-        
-        .footer-links {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .footer-links a {
+        .password-toggle:hover {
             color: #667eea;
-            text-decoration: none;
-            margin: 0 10px;
         }
         
-        .footer-links a:hover {
-            text-decoration: underline;
+        .theme-controls {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+        }
+        
+        .theme-controls .btn {
+            margin: 0.25rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1><i class="fas fa-car-wash"></i> LJ-OS</h1>
-            <p>Sistema de Gestão para Lava Jato</p>
-        </div>
-        
-        <div class="login-form">
-            <div id="alert-container"></div>
-            
-            <form id="loginForm">
-                <div class="form-floating">
-                    <input type="email" class="form-control" id="email" name="email" placeholder="nome@exemplo.com" required>
-                    <label for="email">Email</label>
+    <!-- Controles de Tema -->
+    <div class="theme-controls">
+        <button class="btn btn-outline-primary theme-toggle" title="<?= $localization->get('theme') ?>">
+            <i class="fas fa-moon"></i>
+        </button>
+        <button class="btn btn-outline-secondary contrast-toggle" title="<?= $localization->get('contrast') ?>">
+            <i class="fas fa-adjust"></i>
+        </button>
+        <button class="btn btn-outline-info language-toggle" title="<?= $localization->get('language') ?>">
+            <i class="fas fa-flag"></i>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="login-card">
+                    <!-- Header -->
+                    <div class="login-header">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-tools"></i> <?= $localization->get('app_name') ?>
+                        </h1>
+                        <p class="mb-0 opacity-75"><?= $localization->get('app_description') ?></p>
+                    </div>
+                    
+                    <!-- Body -->
+                    <div class="login-body">
+                        <form id="loginForm">
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope"></i> <?= $localization->get('email') ?>
+                                </label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="seu@email.com" required>
+                            </div>
+                            
+                            <!-- Senha -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock"></i> <?= $localization->get('password') ?>
+                                </label>
+                                <div class="position-relative">
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           placeholder="<?= $localization->get('password') ?>" required>
+                                    <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Lembrar de mim -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    <?= $localization->get('remember_me') ?>
+                                </label>
+                            </div>
+                            
+                            <!-- Botão de Login -->
+                            <button type="submit" class="btn btn-login btn-primary w-100">
+                                <i class="fas fa-sign-in-alt"></i> <?= $localization->get('login') ?>
+                            </button>
+                        </form>
+                        
+                        <!-- Links -->
+                        <div class="text-center mt-3">
+                            <a href="#" class="text-muted small">
+                                <?= $localization->get('forgot_password') ?>
+                            </a>
+                        </div>
+                        
+                        <!-- Alertas -->
+                        <div id="alerts"></div>
+                    </div>
                 </div>
-                
-                <div class="form-floating position-relative">
-                    <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha" required>
-                    <label for="senha">Senha</label>
-                    <i class="fas fa-eye password-toggle" id="passwordToggle"></i>
-                </div>
-                
-                <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="lembrar">
-                    <label class="form-check-label" for="lembrar">
-                        Lembrar de mim
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-login" id="btnLogin">
-                    <span class="btn-text">Entrar</span>
-                    <span class="loading">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        Entrando...
-                    </span>
-                </button>
-            </form>
-            
-            <div class="footer-links">
-                <a href="#" id="esqueciSenha">Esqueci minha senha</a>
-                <a href="#" id="ajuda">Ajuda</a>
             </div>
         </div>
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Theme Manager -->
+    <script src="../app/assets/js/theme-manager.js"></script>
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('loginForm');
-            const emailInput = document.getElementById('email');
-            const senhaInput = document.getElementById('senha');
-            const passwordToggle = document.getElementById('passwordToggle');
-            const btnLogin = document.getElementById('btnLogin');
-            const alertContainer = document.getElementById('alertContainer');
+        // Toggle de senha
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.password-toggle');
             
-            // Toggle de visibilidade da senha
-            passwordToggle.addEventListener('click', function() {
-                const type = senhaInput.type === 'password' ? 'text' : 'password';
-                senhaInput.type = type;
-                this.classList.toggle('fa-eye');
-                this.classList.toggle('fa-eye-slash');
-            });
-            
-            // Login
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = emailInput.value.trim();
-                const senha = senhaInput.value;
-                
-                if (!email || !senha) {
-                    showAlert('Por favor, preencha todos os campos.', 'danger');
-                    return;
-                }
-                
-                // Mostrar loading
-                setLoading(true);
-                
-                try {
-                    const response = await fetch('../api/auth.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            action: 'login',
-                            email: email,
-                            senha: senha
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Salvar tokens
-                        localStorage.setItem('access_token', data.data.access_token);
-                        localStorage.setItem('refresh_token', data.data.refresh_token);
-                        localStorage.setItem('user', JSON.stringify(data.data.user));
-                        
-                        // Salvar email se "lembrar" estiver marcado
-                        if (document.getElementById('lembrar').checked) {
-                            localStorage.setItem('remembered_email', email);
-                        } else {
-                            localStorage.removeItem('remembered_email');
-                        }
-                        
-                        showAlert('Login realizado com sucesso! Redirecionando...', 'success');
-                        
-                        // Redirecionar para dashboard
-                        setTimeout(() => {
-                            window.location.href = 'dashboard.php';
-                        }, 1500);
-                        
-                    } else {
-                        showAlert(data.message || 'Erro no login', 'danger');
-                    }
-                    
-                } catch (error) {
-                    console.error('Erro:', error);
-                    showAlert('Erro de conexão. Tente novamente.', 'danger');
-                } finally {
-                    setLoading(false);
-                }
-            });
-            
-            // Esqueci minha senha
-            document.getElementById('esqueciSenha').addEventListener('click', function(e) {
-                e.preventDefault();
-                showAlert('Entre em contato com o administrador para redefinir sua senha.', 'info');
-            });
-            
-            // Ajuda
-            document.getElementById('ajuda').addEventListener('click', function(e) {
-                e.preventDefault();
-                showAlert('Para suporte técnico, entre em contato com a equipe de desenvolvimento.', 'info');
-            });
-            
-            // Carregar email salvo
-            const rememberedEmail = localStorage.getItem('remembered_email');
-            if (rememberedEmail) {
-                emailInput.value = rememberedEmail;
-                document.getElementById('lembrar').checked = true;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash password-toggle';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'fas fa-eye password-toggle';
             }
+        }
+        
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Funções auxiliares
-            function showAlert(message, type) {
-                alertContainer.innerHTML = `
-                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                        ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `;
-            }
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
             
-            function setLoading(loading) {
-                if (loading) {
-                    btnLogin.disabled = true;
-                    btnLogin.querySelector('.btn-text').style.display = 'none';
-                    btnLogin.querySelector('.loading').style.display = 'inline-block';
-                } else {
-                    btnLogin.disabled = false;
-                    btnLogin.querySelector('.btn-text').style.display = 'inline';
-                    btnLogin.querySelector('.loading').style.display = 'none';
-                }
-            }
-            
-            // Verificar se já está logado
-            const token = localStorage.getItem('access_token');
-            if (token) {
-                // Verificar se token ainda é válido
-                fetch('../api/auth.php', {
+            try {
+                const response = await fetch('../app/api/auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({
-                        action: 'me'
+                        action: 'login',
+                        email: email,
+                        password: password,
+                        remember: remember
                     })
-                }).then(response => {
-                    if (response.ok) {
-                        // Token válido, redirecionar
-                        window.location.href = 'dashboard.php';
-                    } else {
-                        // Token inválido, limpar
-                        localStorage.removeItem('access_token');
-                        localStorage.removeItem('refresh_token');
-                        localStorage.removeItem('user');
-                    }
-                }).catch(() => {
-                    // Erro de conexão, limpar tokens
-                    localStorage.removeItem('access_token');
-                    localStorage.removeItem('refresh_token');
-                    localStorage.removeItem('user');
                 });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Salvar token
+                    if (data.data.token) {
+                        localStorage.setItem('auth_token', data.data.token);
+                        if (remember) {
+                            sessionStorage.setItem('auth_token', data.data.token);
+                        }
+                    }
+                    
+                    // Redirecionar para dashboard
+                    window.location.href = '/app/dashboard.php';
+                } else {
+                    showAlert('danger', data.message || '<?= $localization->get('login_error') ?>');
+                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                showAlert('danger', '<?= $localization->get('error') ?>: ' + error.message);
+            }
+        });
+        
+        // Função para mostrar alertas
+        function showAlert(type, message) {
+            const alertsContainer = document.getElementById('alerts');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            alertsContainer.innerHTML = '';
+            alertsContainer.appendChild(alert);
+            
+            // Remover automaticamente após 5 segundos
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 5000);
+        }
+        
+        // Verificar se já está logado
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+            if (token) {
+                window.location.href = 'dashboard.php';
             }
         });
     </script>

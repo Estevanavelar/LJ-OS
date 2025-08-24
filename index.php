@@ -8,8 +8,8 @@
 
 // Verificar se é uma requisição para a API
 if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') === 0) {
-    // Redirecionar para app/index.php para processar APIs
-    header('Location: /app/index.php' . $_SERVER['REQUEST_URI']);
+    // Redirecionar para public/index.php para processar APIs
+    header('Location: app/index.php' . $_SERVER['REQUEST_URI']);
     exit();
 }
 
@@ -46,7 +46,7 @@ function isSystemInstalled(): bool
 // Verificar instalação
 if (!isSystemInstalled()) {
     // Sistema não instalado - redirecionar para instalador
-    header('Location: /install_web.php');
+    header('Location: install_web.php');
     exit();
 }
 
@@ -56,11 +56,11 @@ $token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
 
 if ($token) {
     // Se já tem token, redirecionar para dashboard
-    header('Location: /app/dashboard.php');
+    header('Location: app/dashboard.php');
     exit();
 }
 
 // Redirecionar para página de login
-header('Location: /app/login.php');
+header('Location: app/login.php');
 exit();
 ?>

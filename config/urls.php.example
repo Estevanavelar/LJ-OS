@@ -1,0 +1,51 @@
+<?php
+/**
+ * Exemplo de Configuração de URLs do LJ-OS
+ * 
+ * Este arquivo é gerado automaticamente durante a instalação.
+ * Você pode copiar este arquivo para urls.php e personalizar as URLs.
+ */
+
+// URL base do sistema (ex: http://localhost/LJ-OS)
+define('BASE_URL', 'http://localhost/LJ-OS');
+
+// URL da aplicação principal
+define('APP_URL', BASE_URL . '/app');
+
+// URL da API
+define('API_URL', BASE_URL . '/app/api');
+
+// URL dos assets (CSS, JS, imagens)
+define('ASSETS_URL', BASE_URL . '/app/assets');
+
+// URL dos componentes
+define('COMPONENTS_URL', BASE_URL . '/app/components');
+
+// URL de uploads
+define('UPLOADS_URL', BASE_URL . '/uploads');
+
+// URL de instalação
+define('INSTALL_URL', BASE_URL . '/install_web.php');
+
+// URLs específicas da aplicação
+define('LOGIN_URL', APP_URL . '/login.php');
+define('DASHBOARD_URL', APP_URL . '/dashboard.php');
+define('LOGOUT_URL', API_URL . '/auth.php');
+
+// URLs de API específicas
+define('AUTH_API_URL', API_URL . '/auth.php');
+define('CLIENTES_API_URL', API_URL . '/clientes.php');
+
+// URLs de assets específicos
+define('CSS_URL', ASSETS_URL . '/css');
+define('JS_URL', ASSETS_URL . '/js');
+define('IMAGES_URL', ASSETS_URL . '/images');
+
+// URLs de componentes específicos
+define('THEME_SETTINGS_URL', COMPONENTS_URL . '/theme-settings.php');
+
+// Exemplo de uso:
+// echo '<link href="' . CSS_URL . '/themes.css" rel="stylesheet">';
+// echo '<script src="' . JS_URL . '/theme-manager.js"></script>';
+// echo '<a href="' . LOGIN_URL . '">Login</a>';
+?>

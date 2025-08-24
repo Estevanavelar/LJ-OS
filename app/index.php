@@ -1,73 +1,56 @@
 <?php
-
 /**
- * LJ-OS - Sistema Principal
- * Ponto de entrada da aplicação
+ * LJ-OS - Sistema de Gestão para Oficinas
+ * 
+ * Ponto de entrada principal da aplicação
  */
 
-// Carregar configurações
-$config = require_once __DIR__ . '/../config/config.php';
+// Carregar autoloader
+require_once __DIR__ . '/../autoload.php';
 
-// Definir timezone
-date_default_timezone_set($config['app']['timezone']);
+// Carregar sistema de localização
+$localization = LJOS\Utils\Localization::getInstance();
 
-// Habilitar exibição de erros em desenvolvimento
-if ($config['app']['debug']) {
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
-}
+// Aplicar configurações de tema e idioma
+$localization->applySettings();
 
-// Iniciar sessão
-session_start();
-
-// Carregar autoloader do Composer (quando disponível)
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-}
-
-// Função para carregar classes manualmente (fallback)
-spl_autoload_register(function ($class) {
-    $file = __DIR__ . '/../src/' . str_replace('\\', '/', $class) . '.php';
-    if (file_exists($file)) {
-        require_once $file;
-    }
-});
-
-// Verificar se é uma requisição AJAX
-$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && 
-          strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
-
-// Roteamento básico
-$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
-$requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
-// Remover query string da URI
-$requestUri = parse_url($requestUri, PHP_URL_PATH);
-
-// Roteamento simples
-switch ($requestUri) {
-    case '/':
-        // Redirecionar para login
-        header('Location: /login.php');
+// Verificar se é uma requisição para a API
+if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') === 0) {
+    // Processar APIs
+    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $apiPath = str_replace('/app', '', $path);
+    
+    // Redirecionar para o arquivo de API apropriado
+    if (strpos($apiPath, '/api/auth') === 0) {
+        require_once __DIR__ . '/api/auth.php';
         exit();
-        break;
-        
-    case '/api/status':
+    } elseif (strpos($apiPath, '/api/clientes') === 0) {
+        require_once __DIR__ . '/api/clientes.php';
+        exit();
+    } elseif (strpos($apiPath, '/api/status') === 0) {
+        // API de status
         header('Content-Type: application/json');
         echo json_encode([
-            'status' => 'success',
-            'message' => 'LJ-OS API funcionando',
+            'status' => 'online',
             'timestamp' => date('c'),
-            'version' => $config['app']['version'],
-            'php_version' => PHP_VERSION
+            'version' => '1.0.0',
+            'environment' => 'development'
         ]);
-        break;
-        
-    default:
-        http_response_code(404);
-        echo '<h1>404 - Página não encontrada</h1>';
-        echo '<p>A página solicitada não existe.</p>';
-        echo '<p><a href="/">Voltar ao início</a></p>';
-        break;
+        exit();
+    }
 }
+
+// Verificar se já está logado
+session_start();
+$token = $_SESSION['token'] ?? $_COOKIE['token'] ?? null;
+
+if ($token) {
+    // Se já tem token, redirecionar para dashboard
+    header('Location: dashboard.php');
+    exit();
+}
+
+// Redirecionar para página de login
+header('Location: login.php');
+exit();
+?>

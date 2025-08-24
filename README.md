@@ -17,8 +17,9 @@ O sistema LJ-OS possui um instalador automático que configura tudo para você:
 
 #### Opção 1: Instalador Web (Interface Gráfica)
 1. Acesse: `http://localhost/LJ-OS/install_web.php`
-2. Siga os passos na tela
-3. O sistema será configurado automaticamente
+2. Configure a **URL raiz** do sistema (ex: `http://localhost/LJ-OS`)
+3. Siga os passos na tela
+4. O sistema será configurado automaticamente com as URLs corretas
 
 #### Opção 2: Instalador via Linha de Comando
 ```bash
@@ -56,7 +57,9 @@ composer start
 
 ### Opção 2: XAMPP (produção)
 - Coloque o projeto em `C:\xampp\htdocs\LJ-OS`
-- Acesse: `http://localhost/LJ-OS/app/`
+- Acesse: `http://localhost/LJ-OS/` (página principal)
+- Acesse: `http://localhost/LJ-OS/app/` (aplicação)
+- Acesse: `http://localhost/LJ-OS/install_web.php` (instalador)
 
 ## 📁 Estrutura do projeto
 
@@ -103,6 +106,23 @@ composer cs-fix
 
 ## ⚙️ Configurações
 
+### URLs do Sistema
+O sistema LJ-OS gera automaticamente um arquivo `config/urls.php` durante a instalação com todas as URLs necessárias:
+
+```php
+// Exemplo de configuração gerada
+define('BASE_URL', 'http://localhost/LJ-OS');
+define('APP_URL', BASE_URL . '/app');
+define('API_URL', BASE_URL . '/app/api');
+define('ASSETS_URL', BASE_URL . '/app/assets');
+```
+
+**Para usar em suas páginas:**
+```php
+require_once __DIR__ . '/../config/urls.php';
+echo '<link href="' . ASSETS_URL . '/css/themes.css" rel="stylesheet">';
+```
+
 ### VS Code
 O projeto já está configurado para usar o PHP do XAMPP. As configurações estão em `.vscode/settings.json`.
 
@@ -114,11 +134,22 @@ O projeto já está configurado para usar o PHP do XAMPP. As configurações est
 
 ## 🌐 Endpoints disponíveis
 
-- **`/`** - Redireciona para página de login
+### URLs Base (configuráveis durante instalação)
+- **`BASE_URL`** - URL raiz do sistema (ex: `http://localhost/LJ-OS`)
+- **`APP_URL`** - URL da aplicação principal (`BASE_URL/app`)
+- **`API_URL`** - URL da API (`BASE_URL/app/api`)
+- **`ASSETS_URL`** - URL dos assets (`BASE_URL/app/assets`)
+
+### Endpoints principais
+- **`/`** - Página principal (redireciona para login ou dashboard)
+- **`/install_web.php`** - Instalador web do sistema
+- **`/app/`** - Página principal da aplicação
 - **`/app/login.php`** - Página de login do sistema
+- **`/app/dashboard.php`** - Dashboard principal
 - **`/app/api/auth.php`** - API de autenticação (login, logout, refresh)
 - **`/app/api/clientes.php`** - API de gestão de clientes
 - **`/app/api/status`** - Status da API em JSON
+- **`/app/components/theme-settings.php`** - Configurações de tema e idioma
 
 ## 🌍 Funcionalidades de Internacionalização
 
@@ -161,6 +192,17 @@ http://localhost/LJ-OS/test_system.php
 
 # Via linha de comando
 php test_system.php
+```
+
+### Teste das URLs
+Para verificar se as URLs estão configuradas corretamente:
+
+```bash
+# Via navegador
+http://localhost/LJ-OS/test_urls.php
+
+# Via linha de comando
+php test_urls.php
 ```
 
 ### Teste das Novas Funcionalidades
