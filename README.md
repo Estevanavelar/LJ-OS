@@ -95,19 +95,31 @@ LJ-OS/
 │   ├── assets/      # CSS, JS e imagens
 │   ├── components/  # Componentes reutilizáveis
 │   ├── languages/   # Arquivos de idioma
+│   ├── api/         # APIs do sistema
 │   └── index.php    # Ponto de entrada da aplicação
 ├── config/          # Configurações da aplicação
+├── database/        # Banco de dados SQLite
 ├── logs/            # Arquivos de log
+├── cache/           # Cache do sistema
+├── tmp/             # Arquivos temporários
+├── uploads/         # Arquivos enviados pelos usuários
 ├── src/             # Código fonte da aplicação
 │   ├── Database/    # Classes de banco de dados
 │   ├── Models/      # Modelos de dados
 │   ├── Utils/       # Utilitários (idiomas, temas)
 │   └── Auth/        # Autenticação e autorização
-├── tests/           # Testes unitários
-├── vendor/          # Dependências do Composer
+├── sql/             # Scripts SQL do banco
+├── script/          # Documentação e especificações
 ├── .vscode/         # Configurações do VS Code
 ├── composer.json    # Configurações do Composer
 ├── .gitignore       # Arquivos ignorados pelo Git
+├── autoload.php     # Autoloader personalizado
+├── index.php        # Página principal
+├── install.php      # Instalador CLI
+├── install_web.php  # Instalador web
+├── clean_and_reinstall.php # Script de limpeza
+├── CLEAN_INSTALL.md # Documentação de limpeza
+├── INSTALACAO.md    # Guia de instalação
 └── README.md        # Este arquivo
 ```
 
