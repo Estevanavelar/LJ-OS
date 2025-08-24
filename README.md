@@ -44,6 +44,32 @@ php install.php
    - Copie o arquivo `.env.example` para `.env` (quando disponível)
    - Ajuste as configurações de banco de dados em `config/config.php`
 
+### Limpeza e Reinstalação
+
+Se você precisar reinstalar o sistema do zero:
+
+1. **Acesse o script de limpeza:**
+   ```
+   http://localhost/LJ-OS/clean_and_reinstall.php
+   ```
+
+2. **⚠️ ATENÇÃO - Esta operação é IRREVERSÍVEL:**
+   - Remove TODOS os dados do sistema
+   - Deleta o banco de dados
+   - Limpa todas as configurações
+   - Remove todos os usuários
+   - Apaga arquivos de cache e logs
+
+3. **Processo de limpeza:**
+   - Confirme que deseja continuar
+   - O sistema será limpo automaticamente
+   - Você será redirecionado para o instalador
+
+4. **Após a limpeza:**
+   - Acesse `install_web.php` para reinstalar
+   - Configure todos os parâmetros novamente
+   - O sistema estará limpo e pronto para uso
+
 ## 🚀 Como executar
 
 ### Opção 1: Servidor PHP embutido (desenvolvimento)
@@ -143,6 +169,7 @@ O projeto já está configurado para usar o PHP do XAMPP. As configurações est
 ### Endpoints principais
 - **`/`** - Página principal (redireciona para login ou dashboard)
 - **`/install_web.php`** - Instalador web do sistema
+- **`/clean_and_reinstall.php`** - Script de limpeza e reinstalação
 - **`/app/`** - Página principal da aplicação
 - **`/app/login.php`** - Página de login do sistema
 - **`/app/dashboard.php`** - Dashboard principal
