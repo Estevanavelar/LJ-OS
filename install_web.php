@@ -534,8 +534,67 @@ function processInstallation(string $baseUrl = '', array $dbConfig = [], array $
             
             // Verificar se as tabelas foram criadas
             $stmt = $connection->query("SELECT name FROM sqlite_master WHERE type='table' AND name='usuarios'");
-            if (!$stmt->fetch()) {
-                $errors[] = 'Tabelas do banco não foram criadas';
+            $tabelasExistem = $stmt->fetch();
+            
+            if (!$tabelasExistem) {
+                // Banco não existe - criar do zero
+                echo "🔄 Criando banco de dados...\n";
+                $sqlFile = __DIR__ . '/sql/schema.sql';
+                if (file_exists($sqlFile)) {
+                    $sql = file_get_contents($sqlFile);
+                    $connection->exec($sql);
+                    echo "✅ Banco de dados criado com sucesso!\n";
+                } else {
+                    $errors[] = 'Arquivo schema.sql não encontrado';
+                    return ['success' => false, 'errors' => $errors];
+                }
+            } else {
+                // Banco existe - verificar se precisa de atualização
+                echo "✅ Banco de dados já existe\n";
+                echo "🔄 Verificando se precisa de atualização...\n";
+                
+                $sqlFile = __DIR__ . '/sql/schema.sql';
+                if (file_exists($sqlFile)) {
+                    $sql = file_get_contents($sqlFile);
+                    
+                    // Executar comandos ALTER TABLE para adicionar colunas faltantes
+                    $alteracoes = [];
+                    
+                    // Verificar estrutura atual da tabela usuarios
+                    $stmt = $connection->query("PRAGMA table_info(usuarios)");
+                    $colunasAtuais = $stmt->fetchAll();
+                    $nomesColunas = array_column($colunasAtuais, 'name');
+                    
+                    // Lista de colunas que devem existir
+                    $colunasEsperadas = [
+                        'id_usuario', 'nome', 'email', 'senha', 'nivel_acesso', 
+                        'status', 'data_cadastro', 'ultimo_login', 'foto_perfil', 
+                        'telefone', 'observacoes'
+                    ];
+                    
+                    // Verificar colunas faltantes
+                    foreach ($colunasEsperadas as $coluna) {
+                        if (!in_array($coluna, $nomesColunas)) {
+                            $alteracoes[] = "ALTER TABLE usuarios ADD COLUMN $coluna";
+                        }
+                    }
+                    
+                    // Executar alterações se necessário
+                    if (!empty($alteracoes)) {
+                        echo "📋 Aplicando atualizações do banco...\n";
+                        foreach ($alteracoes as $alteracao) {
+                            try {
+                                $connection->exec($alteracao);
+                                echo "   ✅ " . $alteracao . "\n";
+                            } catch (Exception $e) {
+                                echo "   ⚠️ " . $alteracao . " - " . $e->getMessage() . "\n";
+                            }
+                        }
+                        echo "✅ Banco de dados atualizado com sucesso!\n";
+                    } else {
+                        echo "✅ Banco de dados está atualizado\n";
+                    }
+                }
             }
         } catch (Exception $e) {
             $errors[] = 'Erro ao conectar ao banco: ' . $e->getMessage();
@@ -544,7 +603,8 @@ function processInstallation(string $baseUrl = '', array $dbConfig = [], array $
         // Criar usuário admin se não existir
         if (empty($errors)) {
             try {
-                $stmt = $connection->query("SELECT id_usuario FROM usuarios WHERE email = '" . addslashes($adminConfig['email']) . "'");
+                $stmt = $connection->prepare("SELECT id_usuario FROM usuarios WHERE email = ?");
+                $stmt->execute([$adminConfig['email']]);
                 if (!$stmt->fetch()) {
                     $senha = password_hash($adminConfig['password'], PASSWORD_DEFAULT);
                     $sql = "INSERT INTO usuarios (nome, email, senha, nivel_acesso, status, data_cadastro) 
@@ -559,6 +619,9 @@ function processInstallation(string $baseUrl = '', array $dbConfig = [], array $
                         'ATIVO',
                         date('Y-m-d H:i:s')
                     ]);
+                    echo "✅ Usuário administrador criado com sucesso!\n";
+                } else {
+                    echo "✅ Usuário administrador já existe!\n";
                 }
             } catch (Exception $e) {
                 $errors[] = 'Erro ao criar usuário admin: ' . $e->getMessage();
